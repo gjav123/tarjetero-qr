@@ -78,7 +78,7 @@ button,input,select{font:inherit;color:inherit}
 @media (prefers-reduced-motion:reduce){.cardbox{transition:none}}
 
 /* panel */
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;min-width:0}
+.panel{container-type:inline-size;background:var(--panel);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;min-width:0}
 .steps{display:flex;gap:4px;padding:10px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .steps::-webkit-scrollbar{display:none}
 .steps button{flex:1 0 auto;display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:8px 10px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:13.5px;font-weight:600;white-space:nowrap}
@@ -105,6 +105,7 @@ input[type=text]:focus,input[type=email]:focus,input[type=tel]:focus,select:focu
 /* option grids */
 .opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .opts.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opts.big .opt{padding:10px}
 .opt{border:1.5px solid var(--line);background:var(--panel);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:7px;cursor:pointer;text-align:left;min-width:0;transition:border-color .15s,transform .15s}
 .opt:hover{border-color:var(--muted)}
 .opt[aria-pressed="true"]{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
@@ -153,6 +154,7 @@ pre.vc{font-family:var(--f-mono);font-size:11.5px;background:var(--soft);border-
 
 footer{max-width:1240px;margin:0 auto;padding-block:0 30px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));font-size:12.5px;color:var(--muted)}
 
+@container (max-width:660px){.steps button .lbl{display:none}.steps button[aria-current="step"] .lbl{display:inline}.steps button{flex:0 0 auto}.steps{justify-content:space-between}}
 @media (max-width:920px){
   .app{grid-template-columns:minmax(0,1fr);gap:14px}
   .stage{position:relative;top:0;min-height:0}
@@ -167,6 +169,7 @@ footer{max-width:1240px;margin:0 auto;padding-block:0 30px;padding-left:max(20px
   .fields{grid-template-columns:1fr}
   .opts{grid-template-columns:repeat(2,minmax(0,1fr))}
   .fonts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .opts.big{grid-template-columns:1fr}
   .exports{grid-template-columns:1fr}
   .slider{grid-template-columns:1fr 44px}
   .slider > span{grid-column:1/-1}
@@ -205,11 +208,12 @@ footer{max-width:1240px;margin:0 auto;padding-block:0 30px;padding-left:max(20px
 
   <section class="panel" aria-label="Asistente">
     <nav class="steps" id="steps" aria-label="Pasos">
-      <button type="button" data-step="0"><span class="n">1</span><span class="lbl">Datos</span></button>
-      <button type="button" data-step="1"><span class="n">2</span><span class="lbl">Diseño</span></button>
-      <button type="button" data-step="2"><span class="n">3</span><span class="lbl">Imagen</span></button>
-      <button type="button" data-step="3"><span class="n">4</span><span class="lbl">Reverso</span></button>
-      <button type="button" data-step="4"><span class="n">5</span><span class="lbl">Descargar</span></button>
+      <button type="button" data-step="0" title="Datos"><span class="n">1</span><span class="lbl">Datos</span></button>
+      <button type="button" data-step="1" title="Diseño"><span class="n">2</span><span class="lbl">Diseño</span></button>
+      <button type="button" data-step="2" title="Letra"><span class="n">3</span><span class="lbl">Letra</span></button>
+      <button type="button" data-step="3" title="Imagen"><span class="n">4</span><span class="lbl">Imagen</span></button>
+      <button type="button" data-step="4" title="Reverso"><span class="n">5</span><span class="lbl">Reverso</span></button>
+      <button type="button" data-step="5" title="Descargar"><span class="n">6</span><span class="lbl">Descargar</span></button>
     </nav>
 
     <!-- 1 · Datos -->
@@ -253,14 +257,17 @@ footer{max-width:1240px;margin:0 auto;padding-block:0 30px;padding-left:max(20px
         <span class="label">Color</span>
         <div class="swatches" id="swatches"></div>
       </div>
-      <div class="group">
-        <span class="label">Tipografía</span>
-        <div class="fonts" id="fontOpts"></div>
-      </div>
     </div>
 
-    <!-- 3 · Imagen -->
+    <!-- 3 · Letra -->
     <div class="body" data-pane="2" hidden>
+      <h2>Elige la letra</h2>
+      <p class="lead">Cada muestra es tu tarjeta con esa tipografía. Fíjate sobre todo en el nombre y en los datos pequeños.</p>
+      <div class="opts two big" id="fontOpts"></div>
+    </div>
+
+    <!-- 4 · Imagen -->
+    <div class="body" data-pane="3" hidden>
       <h2>Añade una imagen</h2>
       <p class="lead">Puede ser tu logo o una foto que ocupe toda la tarjeta. Es opcional.</p>
       <label class="drop" id="drop" for="imgIn">
@@ -284,8 +291,8 @@ footer{max-width:1240px;margin:0 auto;padding-block:0 30px;padding-left:max(20px
       <div class="inline" id="imgActions" hidden><button type="button" class="btn" id="imgDel">Quitar imagen</button></div>
     </div>
 
-    <!-- 4 · Reverso -->
-    <div class="body" data-pane="3" hidden>
+    <!-- 5 · Reverso -->
+    <div class="body" data-pane="4" hidden>
       <h2>El reverso y el QR</h2>
       <p class="lead">El QR en el reverso se lee mejor porque tiene más espacio. En el anverso queda todo en una cara.</p>
       <div class="group">
@@ -296,11 +303,12 @@ footer{max-width:1240px;margin:0 auto;padding-block:0 30px;padding-left:max(20px
         <span class="label">Fondo del reverso</span>
         <div class="opts" id="backOpts"></div>
       </div>
+      <p class="note" id="blankNote" hidden>Con el reverso en blanco, el QR va en el anverso y los PDF salen a una sola cara.</p>
       <p class="note warn" id="qrWarn" hidden></p>
     </div>
 
-    <!-- 5 · Descargar -->
-    <div class="body" data-pane="4" hidden>
+    <!-- 6 · Descargar -->
+    <div class="body" data-pane="5" hidden>
       <h2>Lista para imprimir</h2>
       <p class="lead">Antes de imprimir muchas, escanea el QR de la pantalla con tu móvil para comprobarlo.</p>
       <div class="exports">
@@ -494,6 +502,7 @@ function drawBack(ctx,k,b){
   if(bs==='color'){k.rect(...full,A);fg=onAccent();sub=fg==='#ffffff'?'rgba(255,255,255,.82)':'rgba(0,0,0,.65)'}
   else if(bs==='oscuro')k.rect(...full,'#15171c');
   else if(bs==='foto'){k.rect(...full,'#222');k.cover(...full)}
+  else if(bs==='vacio'){k.rect(...full,'#ffffff');return}
   else {k.rect(...full,'#ffffff');k.rect(-b,H-2.6,W+2*b,2.6+b,A);fg=INK;sub=MUTED}
   if(qrB){
     const ps=30,px=(W-ps)/2,py=7;
@@ -547,8 +556,9 @@ function render(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   else $('qrStats').textContent='Demasiados datos para un QR';
   $('exampleNote').hidden=!FIELDS.some(f=>st[f]&&st[f]===EX[f]);
   if(step===1)renderTemplateThumbs();
-  if(step===2)renderImgThumbs();
-  if(step===3)renderBackThumbs();
+  if(step===2)renderFontThumbs();
+  if(step===3)renderImgThumbs();
+  if(step===4)renderBackThumbs();
   const save=Object.assign({},st);if(!store('tq2-state',save)){save.img='';store('tq2-state',save)}
 })}
 
@@ -560,7 +570,10 @@ $('clearAll').addEventListener('click',()=>{FIELDS.forEach(f=>{st[f]='';$(f).val
 function optButton(container,key,val,title,desc,withCanvas){
   const b=document.createElement('button');b.type='button';b.className='opt';b.dataset.v=val;
   b.innerHTML=(withCanvas?'<canvas></canvas>':'')+`<span class="t">${title}</span>`+(desc?`<span class="d">${desc}</span>`:'');
-  b.addEventListener('click',()=>{if(b.disabled)return;st[key]=val;syncAll();render()});container.appendChild(b);return b}
+  b.addEventListener('click',()=>{if(b.disabled)return;st[key]=val;
+    if(key==='backStyle'&&val==='vacio')st.qrSide='front';
+    if(key==='qrSide'&&val==='back'&&st.backStyle==='vacio')st.backStyle='color';
+    syncAll();render()});container.appendChild(b);return b}
 TEMPLATES.forEach(t=>optButton($('tplOpts'),'template',t.id,t.name,t.desc,true));
 function thumbWith(over,side,cv){const saved=Object.assign({},st);Object.assign(st,over);qrC.k='';renderTo(cv,side,cv.parentElement.clientWidth/W*dpr()||3,'flat');Object.assign(st,saved);qrC.k=''}
 function renderTemplateThumbs(){$('tplOpts').querySelectorAll('.opt').forEach(b=>thumbWith({template:b.dataset.v},'front',b.querySelector('canvas')))}
@@ -568,9 +581,9 @@ SWATCHES.forEach(c=>{const b=document.createElement('button');b.type='button';b.
   b.addEventListener('click',()=>{st.accent=c;syncAll();render()});$('swatches').appendChild(b)});
 (function(){const l=document.createElement('label');l.className='custom';l.title='Otro color';l.innerHTML='<input type="color" id="accentPick" aria-label="Elegir otro color">';$('swatches').appendChild(l);
   $('accentPick').addEventListener('input',e=>{st.accent=e.target.value;syncAll();render()})})();
-Object.entries(FONTS).forEach(([id,f])=>{const b=document.createElement('button');b.type='button';b.className='fontopt';b.dataset.v=id;
-  b.innerHTML=`<span class="aa" style='font-family:${f.fam}'>Aa</span><span class="t">${f.name}</span>`;
-  b.addEventListener('click',()=>{st.font=id;syncAll();render()});$('fontOpts').appendChild(b)});
+const FONT_DESC={moderna:'Sans actual y limpia',clasica:'Serif con carácter',geometrica:'Redonda y amable',tecnica:'Monoespaciada, de ingeniería'};
+Object.entries(FONTS).forEach(([id,f])=>{const b=optButton($('fontOpts'),'font',id,f.name,FONT_DESC[id],true);b.querySelector('.t').style.fontFamily=f.fam;b.querySelector('.t').style.fontSize='16px'});
+function renderFontThumbs(){$('fontOpts').querySelectorAll('.opt').forEach(b=>thumbWith({font:b.dataset.v},'front',b.querySelector('canvas')))}
 
 /* ---------- step 3: image ---------- */
 const IMG_MODES=[['none','Sin imagen','Solo texto'],['logo','Como logo','Arriba, junto a tus datos'],['fondo','Foto de fondo','Ocupa toda la tarjeta']];
@@ -599,17 +612,18 @@ $('imgDel').addEventListener('click',()=>setImg(''));
 /* ---------- step 4: back & QR ---------- */
 optButton($('qrOpts'),'qrSide','back','En el reverso','Más grande y fácil de leer',true);
 optButton($('qrOpts'),'qrSide','front','En el anverso','Todo en una sola cara',true);
-const BACKS=[['color','Color','Tu color de marca'],['blanco','Blanco','Con filete de color'],['oscuro','Oscuro','Negro suave'],['foto','Foto','Tu imagen de fondo']];
+const BACKS=[['vacio','En blanco','Sin nada impreso detrás'],['blanco','Blanco','Con filete de color'],['color','Color','Tu color de marca'],['oscuro','Oscuro','Negro suave'],['foto','Foto','Tu imagen de fondo']];
 BACKS.forEach(([v,t,d])=>optButton($('backOpts'),'backStyle',v,t,d,true));
 function renderBackThumbs(){
-  $('qrOpts').querySelectorAll('.opt').forEach(b=>thumbWith({qrSide:b.dataset.v},b.dataset.v==='back'?'back':'front',b.querySelector('canvas')));
-  $('backOpts').querySelectorAll('.opt').forEach(b=>{b.disabled=b.dataset.v==='foto'&&!img;thumbWith({backStyle:b.dataset.v},'back',b.querySelector('canvas'))});
+  $('qrOpts').querySelectorAll('.opt').forEach(b=>thumbWith({qrSide:b.dataset.v,backStyle:b.dataset.v==='back'&&st.backStyle==='vacio'?'color':st.backStyle},b.dataset.v==='back'?'back':'front',b.querySelector('canvas')));
+  $('backOpts').querySelectorAll('.opt').forEach(b=>{b.disabled=b.dataset.v==='foto'&&!img;thumbWith({backStyle:b.dataset.v,qrSide:b.dataset.v==='vacio'?'front':st.qrSide},'back',b.querySelector('canvas'))});
+  $('blankNote').hidden=st.backStyle!=='vacio';
 }
 
 /* ---------- sync pressed states ---------- */
 function syncAll(){
   const pr=(sel,val)=>document.querySelectorAll(sel).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===val)));
-  pr('#tplOpts .opt',st.template);pr('#fontOpts .fontopt',st.font);pr('#imgOpts .opt',st.imgMode);pr('#qrOpts .opt',st.qrSide);pr('#backOpts .opt',st.backStyle);
+  pr('#tplOpts .opt',st.template);pr('#fontOpts .opt',st.font);pr('#imgOpts .opt',st.imgMode);pr('#qrOpts .opt',st.qrSide);pr('#backOpts .opt',st.backStyle);
   document.querySelectorAll('.sw').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c.toLowerCase()===st.accent.toLowerCase())));
   $('accentPick').value=st.accent;
   $('photoCtl').hidden=!(img&&st.imgMode==='fondo'||img&&st.backStyle==='foto');
@@ -620,7 +634,7 @@ function syncAll(){
 }
 
 /* ---------- steps ---------- */
-const LABELS=['Datos','Diseño','Imagen','Reverso','Descargar'];
+const LABELS=['Datos','Diseño','Letra','Imagen','Reverso','Descargar'];
 function setView(v){view=v;
   $('sideFront').setAttribute('aria-pressed',String(v==='front'));$('sideBack').setAttribute('aria-pressed',String(v==='back'));$('sideBoth').setAttribute('aria-pressed',String(v==='both'));
   $('boxFront').hidden=v==='back';$('boxBack').hidden=v==='front';$('cards').classList.toggle('both',v==='both');render()}
@@ -629,39 +643,40 @@ function flipTo(v){if(v===view)return;const boxes=[$('boxFront'),$('boxBack')];b
 $('sideFront').onclick=()=>flipTo('front');$('sideBack').onclick=()=>flipTo('back');$('sideBoth').onclick=()=>flipTo('both');
 let booted=false;
 function go(n){
-  step=Math.max(0,Math.min(4,n));
+  step=Math.max(0,Math.min(5,n));
   document.querySelectorAll('[data-pane]').forEach(p=>p.hidden=+p.dataset.pane!==step);
   document.querySelectorAll('#steps button').forEach(b=>{const i=+b.dataset.step;b.setAttribute('aria-current',i===step?'step':'false');b.classList.toggle('done',i<step)});
   $('prevBtn').style.visibility=step===0?'hidden':'visible';
-  $('nextBtn').textContent=step===4?'Volver a editar':'Siguiente: '+LABELS[step+1];
-  flipTo(step===3?'back':step===4?'both':'front');
-  try{sessionStorage.setItem('tq2-step',step)}catch(e){}
+  $('nextBtn').textContent=step===5?'Volver a editar':'Siguiente: '+LABELS[step+1];
+  flipTo(step===4?'back':step===5?'both':'front');
+  try{sessionStorage.setItem('tq3-step',step)}catch(e){}
   if(booted&&innerWidth<=920){document.querySelector('.panel').scrollIntoView({behavior:'smooth',block:'start'})}
   render();
 }
 document.querySelectorAll('#steps button').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.step)));
 $('prevBtn').addEventListener('click',()=>go(step-1));
-$('nextBtn').addEventListener('click',()=>go(step===4?0:step+1));
+$('nextBtn').addEventListener('click',()=>go(step===5?0:step+1));
 
 /* ---------- export ---------- */
 const slug=()=>(fullName().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'tarjeta');
 const toast=m=>{$('toast').textContent=m};
+const oneSided=()=>st.backStyle==='vacio';
 const blobOf=cv=>new Promise(r=>cv.toBlob(r,'image/png'));
 function download(name,blob){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000)}
 const EXP={
   async pdf(){const {jsPDF}=window.jspdf,w=W+2*BLEED,h=H+2*BLEED,doc=new jsPDF({unit:'mm',format:[w,h],orientation:'landscape'});
-    doc.addImage(mk('front',DPI,'print'),'PNG',0,0,w,h,'f','FAST');doc.addPage([w,h],'landscape');doc.addImage(mk('back',DPI,'print'),'PNG',0,0,w,h,'b','FAST');
+    doc.addImage(mk('front',DPI,'print'),'PNG',0,0,w,h,'f','FAST');if(!oneSided()){doc.addPage([w,h],'landscape');doc.addImage(mk('back',DPI,'print'),'PNG',0,0,w,h,'b','FAST')}
     download(slug()+'-imprenta.pdf',doc.output('blob'));return 'PDF para imprenta descargado.'},
   async a4(){const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'}),mx=20,my=11;
     const im={front:mk('front',DPI,'flat'),back:mk('back',DPI,'flat')};
-    ['front','back'].forEach((side,i)=>{if(i)doc.addPage('a4','portrait');
+    (oneSided()?['front']:['front','back']).forEach((side,i)=>{if(i)doc.addPage('a4','portrait');
       // back page mirrors columns so the sheet lines up when flipped on the long edge
       for(let r=0;r<5;r++)for(let c=0;c<2;c++){const cc=side==='back'?1-c:c;doc.addImage(im[side],'PNG',mx+cc*W,my+r*H,W,H,side,'FAST')}
       doc.setDrawColor(120);doc.setLineWidth(.15);
       for(let c=0;c<=2;c++){const x=mx+c*W;doc.line(x,my-6,x,my-1);doc.line(x,my+5*H+1,x,my+5*H+6)}
       for(let r=0;r<=5;r++){const y=my+r*H;doc.line(mx-6,y,mx-1,y);doc.line(mx+2*W+1,y,mx+2*W+6,y)}});
     download(slug()+'-hoja-A4.pdf',doc.output('blob'));return 'Hoja A4 descargada.'},
-  async png(){download(slug()+'-anverso.png',await blobOf(mk('front',DPI,'flat')));await new Promise(r=>setTimeout(r,400));download(slug()+'-reverso.png',await blobOf(mk('back',DPI,'flat')));return 'Anverso y reverso descargados.'},
+  async png(){download(slug()+'-anverso.png',await blobOf(mk('front',DPI,'flat')));if(oneSided())return 'Anverso descargado.';await new Promise(r=>setTimeout(r,400));download(slug()+'-reverso.png',await blobOf(mk('back',DPI,'flat')));return 'Anverso y reverso descargados.'},
   async qr(){const q=getQR();if(!q)return 'Hay demasiados datos para un QR.';const n=q.getModuleCount(),qz=4,cell=Math.ceil(1400/(n+2*qz)),size=cell*(n+2*qz),c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');
     x.fillStyle='#fff';x.fillRect(0,0,size,size);x.fillStyle='#000';for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect((k+qz)*cell,(r+qz)*cell,cell,cell);
     download(slug()+'-qr.png',await blobOf(c));return 'QR descargado.'},
@@ -690,7 +705,7 @@ $('savedSel').addEventListener('change',e=>{const p=saved()[e.target.value];if(!
 /* ---------- boot ---------- */
 fillSaved('');syncAll();
 if(st.img)setImg(st.img,true);
-let s1=0;try{s1=+sessionStorage.getItem('tq2-step')||0}catch(e){}
+let s1=0;try{s1=+sessionStorage.getItem('tq3-step')||0}catch(e){}
 go(s1);booted=true;
 const fl=[];['400','500','600','700'].forEach(w=>['Instrument Sans','Fraunces','Outfit','IBM Plex Mono'].forEach(f=>fl.push(document.fonts.load(`${w} 20px "${f}"`).catch(()=>{}))));
 Promise.all(fl).then(render);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(render);
