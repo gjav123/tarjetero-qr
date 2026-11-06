@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tarjetero QR · Tarjetas de visita con QR</title>
+<meta name="description" content="Crea tu tarjeta de visita con un QR que guarda tu contacto en el móvil. Descarga el PDF para imprenta o una hoja A4. Gratis y sin registro.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tarjetero QR">
+<meta property="og:description" content="Tarjetas de visita con QR de contacto. PDF para imprenta, hoja A4 y PNG. Gratis, sin registro y sin enviar tus datos.">
+<meta property="og:image" content="https://tarjetero-qr.vercel.app/og.png">
+<meta property="og:url" content="https://tarjetero-qr.vercel.app/">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='7' width='28' height='18' rx='2' fill='%231d3f8f'/%3E%3Crect x='19' y='11' width='8' height='8' fill='%23fff'/%3E%3Crect x='5' y='12' width='11' height='2' fill='%23fff'/%3E%3Crect x='5' y='16' width='7' height='1.5' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>html,body{margin:0}body{font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<style>
+/* Mesa de pruebas de imprenta: panel de controles a la izquierda, prueba de la tarjeta a escala a la derecha */
+:root{color-scheme:light;
+  --bg:#e7eaee; --panel:#f8f9fb; --fg:#15181e; --muted:#5b6370; --line:#d2d7de; --accent:#2446c4; --accent-ink:#ffffff; --warn:#a35a00;
+  --f-ui:"Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111317; --panel:#1a1d23; --fg:#e8eaee; --muted:#98a0ad; --line:#2d323b; --accent:#8099ff; --accent-ink:#0d1020; --warn:#f0a94a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111317; --panel:#1a1d23; --fg:#e8eaee; --muted:#98a0ad; --line:#2d323b; --accent:#8099ff; --accent-ink:#0d1020; --warn:#f0a94a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:14px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+header.top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:4px 12px;margin-bottom:18px}
+header.top .lede{grid-column:1/-1;margin:2px 0 0;color:var(--muted);max-width:62ch}
+h1{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.spec{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;align-items:start}
+.controls{display:flex;flex-direction:column;gap:14px;min-width:0}
+.proof{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 12px);display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}.proof{position:static;order:-1}}
+section.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.box h2{margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fields .full{grid-column:1/-1}
+@media (max-width:440px){.fields{grid-template-columns:1fr}}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
+input[type=text],input[type=email],input[type=tel],select{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--bg)}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--fg);padding:6px 11px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.lbl{font-size:12px;color:var(--muted);min-width:64px}
+.swatch{width:26px;height:26px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
+input[type=color]{width:30px;height:28px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:2px;cursor:pointer}
+.btn{font:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:7px;padding:7px 12px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.note{font-size:12px;color:var(--muted);margin:0}
+.note.warn{color:var(--warn)}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.cards{display:grid;grid-template-columns:1fr;gap:12px;justify-items:center}
+.cardwrap{width:100%;max-width:500px;display:flex;flex-direction:column;gap:6px}
+.cardwrap .cap{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+canvas.card{width:100%;max-width:100%;aspect-ratio:85/55;height:auto;border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.18),0 6px 18px rgba(20,30,50,.14);display:block}
+.exports{display:flex;flex-wrap:wrap;gap:8px}
+.toast{font-size:12px;min-height:18px;color:var(--muted)}
+details summary{cursor:pointer;font-size:12px;color:var(--muted)}
+pre.vc{font-family:var(--f-mono);font-size:11.5px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-x:auto;margin:8px 0 0;white-space:pre}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer}
+.hidden-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Tarjetero QR</h1>
+    <span class="spec">85 × 55 mm · sangrado 3 mm · vCard 3.0</span>
+    <p class="lede">Crea tu tarjeta de visita con un QR que guarda tu contacto en el móvil. Todo se genera en tu navegador: no se envía ningún dato.</p>
+  </header>
+
+  <div class="grid">
+    <div class="controls">
+      <section class="box">
+        <h2>Mis tarjetas</h2>
+        <div class="row">
+          <select id="profileSel" aria-label="Tarjeta guardada" style="flex:1;min-width:140px"></select>
+          <button class="btn" id="delProfile" type="button">Borrar</button>
+        </div>
+        <div class="row">
+          <input type="text" id="profileName" placeholder="Nombre de la tarjeta (p. ej. Docencia)" style="flex:1;min-width:160px">
+          <button class="btn" id="saveProfile" type="button">Guardar</button>
+        </div>
+        <p class="note">Se guardan solo en este navegador. Útil si quieres una versión para cada empresa o proyecto.</p>
+      </section>
+
+      <section class="box">
+        <h2>Datos</h2>
+        <div class="fields">
+          <label class="f">Nombre<input type="text" id="nombre"></label>
+          <label class="f">Apellidos<input type="text" id="apellidos"></label>
+          <label class="f">Cargo<input type="text" id="cargo"></label>
+          <label class="f">Empresa<input type="text" id="empresa"></label>
+          <label class="f">Teléfono<input type="tel" id="tel"></label>
+          <label class="f">Email<input type="email" id="email"></label>
+          <label class="f">Web<input type="text" id="web" placeholder="www.ejemplo.com"></label>
+          <label class="f">LinkedIn<input type="text" id="linkedin" placeholder="linkedin.com/in/usuario"></label>
+          <label class="f full">Dirección (opcional)<input type="text" id="direccion"></label>
+        </div>
+        <p class="note warn" id="exampleNote" hidden>Estos son datos de ejemplo. Pon los tuyos antes de descargar.</p>
+      </section>
+
+      <section class="box">
+        <h2>Diseño</h2>
+        <div class="row"><span class="lbl">Plantilla</span>
+          <div class="seg" id="tplSeg">
+            <button type="button" data-v="limpia">Limpia</button>
+            <button type="button" data-v="banda">Banda</button>
+            <button type="button" data-v="nocturna">Nocturna</button>
+          </div>
+        </div>
+        <div class="row"><span class="lbl">Color</span>
+          <div class="row" id="swatches"></div>
+          <input type="color" id="accentPick" aria-label="Color personalizado">
+        </div>
+        <div class="row"><span class="lbl">Letra</span>
+          <div class="seg" id="fontSeg">
+            <button type="button" data-v="sans">Sans</button>
+            <button type="button" data-v="serif">Serif</button>
+            <button type="button" data-v="geo">Geométrica</button>
+          </div>
+        </div>
+        <div class="row"><span class="lbl">QR</span>
+          <div class="seg" id="qrSeg">
+            <button type="button" data-v="back">Reverso</button>
+            <button type="button" data-v="front">Anverso</button>
+          </div>
+        </div>
+        <div class="row"><span class="lbl">Logo</span>
+          <label class="btn" for="logoIn">Subir imagen</label>
+          <input type="file" id="logoIn" accept="image/png,image/jpeg,image/svg+xml,image/webp" class="hidden-file">
+          <button class="btn" id="logoDel" type="button" hidden>Quitar</button>
+          <span class="note" id="logoInfo">PNG con fondo transparente queda mejor</span>
+        </div>
+      </section>
+    </div>
+
+    <div class="proof">
+      <div class="sheet">
+        <div class="row" style="justify-content:space-between">
+          <label class="chk"><input type="checkbox" id="guides"> Mostrar zona segura</label>
+          <span class="spec" id="qrStats"></span>
+        </div>
+        <div class="cards">
+          <div class="cardwrap"><div class="cap"><span>Anverso</span><span>85 × 55</span></div><canvas class="card" id="cvFront" aria-label="Vista previa del anverso"></canvas></div>
+          <div class="cardwrap"><div class="cap"><span>Reverso</span><span>85 × 55</span></div><canvas class="card" id="cvBack" aria-label="Vista previa del reverso"></canvas></div>
+        </div>
+        <p class="note warn" id="qrWarn" hidden></p>
+      </div>
+
+      <section class="box">
+        <h2>Exportar</h2>
+        <div class="exports">
+          <button class="btn primary" data-exp="pdf">PDF imprenta</button>
+          <button class="btn" data-exp="a4">PDF hoja A4 · 10 tarjetas</button>
+          <button class="btn" data-exp="pngf">PNG anverso</button>
+          <button class="btn" data-exp="pngb">PNG reverso</button>
+          <button class="btn" data-exp="qr">Solo QR</button>
+        </div>
+        <p class="note">PDF imprenta: 91 × 61 mm con sangrado, 300 ppp, dos páginas. Hoja A4: con marcas de corte; imprime a doble cara volteando por el borde largo.</p>
+        <div class="toast" id="toast" role="status"></div>
+        <details>
+          <summary>Ver el contenido del QR</summary>
+          <pre class="vc" id="vcOut"></pre>
+          <div class="row" style="margin-top:8px"><button class="btn" id="copyVc" type="button">Copiar vCard</button></div>
+        </details>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const W=85, H=55, BLEED=3, DPI_S=300/25.4;
+const FONTS={sans:'"Instrument Sans", Helvetica, Arial, sans-serif', serif:'"Fraunces", Georgia, serif', geo:'"Outfit", Futura, "Century Gothic", sans-serif'};
+const TPL={
+  limpia:{bg:'#ffffff',fg:'#1b1d22',muted:'#6b7079',band:0,back:'accent'},
+  banda:{bg:'#ffffff',fg:'#1b1d22',muted:'#6b7079',band:22,back:'paper'},
+  nocturna:{bg:'#16181e',fg:'#f3f3f1',muted:'#a6abb5',band:0,back:'dark'}
+};
+const SWATCHES=['#1d3f8f','#0f5b4f','#8a1c2b','#2b2d33','#b0631b','#5a3d8a'];
+const EXAMPLE={tel:'+34 600 000 000',email:'lucia@transportesdelebro.es',linkedin:'linkedin.com/in/lucia-ejemplo',nombre:'Lucía'};
+const DEFAULT={nombre:'Lucía',apellidos:'Martín Ortega',cargo:'Responsable de Operaciones',empresa:'Transportes del Ebro',
+  tel:EXAMPLE.tel,email:EXAMPLE.email,web:'transportesdelebro.es',linkedin:EXAMPLE.linkedin,direccion:'',
+  template:'limpia',accent:'#1d3f8f',font:'sans',qrSide:'back',logo:''};
+const FIELDS=['nombre','apellidos','cargo','empresa','tel','email','web','linkedin','direccion'];
+
+let st=Object.assign({},DEFAULT);
+let logoImg=null, qrCache={key:'',qr:null};
+
+function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+const saved=load('tq-state'); if(saved) st=Object.assign({},DEFAULT,saved);
+
+const $=id=>document.getElementById(id);
+const toast=m=>{$('toast').textContent=m};
+
+/* ---------- vCard ---------- */
+const esc=s=>String(s).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
+const url=s=>{s=s.trim(); if(!s) return ''; return /^https?:\/\//i.test(s)?s:'https://'+s};
+function liUrl(s){s=s.trim(); if(!s) return ''; if(/linkedin\.com/i.test(s)) return url(s); return 'https://www.linkedin.com/in/'+s.replace(/^@/,'')}
+const short=s=>s.trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'').replace(/\/$/,'');
+function vcard(){
+  const fn=[st.nombre,st.apellidos].filter(Boolean).join(' ').trim();
+  const L=['BEGIN:VCARD','VERSION:3.0',`N:${esc(st.apellidos)};${esc(st.nombre)};;;`,`FN:${esc(fn)}`];
+  if(st.empresa) L.push('ORG:'+esc(st.empresa));
+  if(st.cargo) L.push('TITLE:'+esc(st.cargo));
+  if(st.tel) L.push('TEL;TYPE=CELL:'+st.tel.replace(/[^\d+]/g,''));
+  if(st.email) L.push('EMAIL;TYPE=INTERNET:'+st.email.trim());
+  if(st.web) L.push('URL:'+url(st.web));
+  if(st.linkedin) L.push('URL;TYPE=LinkedIn:'+liUrl(st.linkedin));
+  if(st.direccion) L.push('ADR;TYPE=WORK:;;'+esc(st.direccion)+';;;;');
+  L.push('END:VCARD');
+  return L.join('\r\n');
+}
+function getQR(){
+  const v=vcard();
+  if(qrCache.key===v) return qrCache.qr;
+  let qr=null;
+  try{ qr=qrcode(0,'M'); qr.addData(unescape(encodeURIComponent(v))); qr.make(); }catch(e){ qr=null }
+  qrCache={key:v,qr}; return qr;
+}
+
+/* ---------- drawing ---------- */
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function makeCtx(ctx,s,b){
+  const P=v=>(v+b)*s, L=v=>v*s, fam=FONTS[st.font];
+  function setFont(size,weight,family){ctx.font=`${weight} ${L(size)}px ${family||fam}`}
+  function fit(str,size,weight,maxW,family){let z=size; setFont(z,weight,family);
+    while(ctx.measureText(str).width>L(maxW)&&z>size*0.6){z-=size*0.04;setFont(z,weight,family)} return z}
+  function text(str,x,y,size,weight,color,opt={}){
+    if(!str) return; ctx.save();
+    if('letterSpacing' in ctx) ctx.letterSpacing=opt.ls?L(opt.ls)+'px':'0px';
+    if(opt.maxW) fit(str,size,weight,opt.maxW,opt.family); else setFont(size,weight,opt.family);
+    ctx.fillStyle=color; ctx.textAlign=opt.align||'left'; ctx.textBaseline='alphabetic';
+    ctx.fillText(str,P(x),P(y)); ctx.restore();
+  }
+  function qr(x,y,size,color){
+    const q=getQR(); if(!q) return; const n=q.getModuleCount(), c=size/n;
+    ctx.fillStyle=color;
+    for(let r=0;r<n;r++) for(let k=0;k<n;k++) if(q.isDark(r,k)){
+      const x0=Math.round(P(x+k*c)), x1=Math.round(P(x+(k+1)*c)), y0=Math.round(P(y+r*c)), y1=Math.round(P(y+(r+1)*c));
+      ctx.fillRect(x0,y0,x1-x0,y1-y0);
+    }
+  }
+  function img(im,x,y,w,h,align){
+    const r=Math.min(w/im.width,h/im.height), dw=im.width*r, dh=im.height*r;
+    const dx=align==='center'?x+(w-dw)/2:x, dy=align==='center'?y+(h-dh)/2:y+(h-dh)/2;
+    ctx.drawImage(im,P(dx),P(dy),L(dw),L(dh));
+  }
+  return {P,L,text,qr,img,fam};
+}
+
+function drawCard(ctx,side,s,b,guides){
+  const t=TPL[st.template], c=makeCtx(ctx,s,b), {P,L}=c;
+  const full=[(W+2*b)*s,(H+2*b)*s];
+  let bg=t.bg; if(side==='back'&&t.back==='accent') bg=st.accent;
+  ctx.fillStyle=bg; ctx.fillRect(0,0,full[0],full[1]);
+  if(side==='front') drawFront(ctx,c,t,b,s); else drawBack(ctx,c,t,b,s);
+  if(guides){
+    ctx.save(); ctx.setLineDash([L(1),L(0.8)]); ctx.lineWidth=Math.max(1,L(0.15));
+    ctx.strokeStyle=(side==='back'&&t.back==='accent')||st.template==='nocturna'?'rgba(255,255,255,.55)':'rgba(220,40,90,.7)';
+    ctx.strokeRect(P(4),P(4),L(W-8),L(H-8)); ctx.restore();
+  }
+}
+function contacts(){
+  return [['T',st.tel],['E',st.email.trim()],['W',short(st.web)],['in',short(st.linkedin)],['D',st.direccion]].filter(x=>x[1]);
+}
+function drawFront(ctx,c,t,b,s){
+  const {P,L}=c; let x0=6;
+  if(t.band){
+    ctx.fillStyle=st.accent; ctx.fillRect(0,0,P(t.band),(H+2*b)*s); x0=t.band+5;
+    const label=(st.empresa||st.nombre||'').toUpperCase();
+    if(label){ctx.save(); ctx.translate(P(t.band/2),P(H/2)); ctx.rotate(-Math.PI/2);
+      const cc=makeCtx(ctx,s,0); // local coords (origin already translated)
+      cc.text(label,0,1.1,3.1,600,'#ffffff',{align:'center',ls:0.35,maxW:H-12}); ctx.restore();}
+  }
+  const right=W-6, qrFront=st.qrSide==='front', qrSize=19;
+  const textRight=qrFront?right-qrSize-3:right;
+  if(logoImg){ c.img(logoImg,x0,5.5,26,9,'left'); }
+  else if(!t.band && st.empresa){ c.text(st.empresa.toUpperCase(),x0,9.4,2.3,600,t===TPL.nocturna?lighten(st.accent):st.accent,{ls:0.3,maxW:right-x0}); }
+  const fn=[st.nombre,st.apellidos].filter(Boolean).join(' ');
+  c.text(fn,x0,24,5.1,700,t.fg,{maxW:right-x0});
+  c.text(st.cargo,x0,28.6,2.7,400,t.muted,{maxW:right-x0});
+  if(logoImg && !t.band && st.empresa) c.text(st.empresa,x0,32.2,2.5,600,t.muted,{maxW:right-x0});
+  const list=contacts(), n=list.length, lh=n>=5?3.25:3.7;
+  let y=H-6-(n-1)*lh;
+  const labCol=t===TPL.nocturna?lighten(st.accent):st.accent;
+  list.forEach(([k,v])=>{ c.text(k,x0,y,2.0,700,labCol); c.text(v,x0+4.4,y,2.45,400,t.fg,{maxW:textRight-x0-4.4}); y+=lh; });
+  if(qrFront){
+    const qx=right-qrSize, qy=H-6-qrSize;
+    if(st.template==='nocturna'){ ctx.fillStyle='#ffffff'; rrect(ctx,P(qx),P(qy),L(qrSize),L(qrSize),L(1.2)); ctx.fill(); c.qr(qx+1.6,qy+1.6,qrSize-3.2,'#111111'); }
+    else c.qr(qx,qy,qrSize,t.fg);
+  }
+}
+function drawBack(ctx,c,t,b,s){
+  const {P,L}=c, qrBack=st.qrSide==='back';
+  const onAccent=t.back==='accent', cap=onAccent?'rgba(255,255,255,.85)':t.muted;
+  if(t.back==='paper'){ ctx.fillStyle=st.accent; ctx.fillRect(0,P(H-3),(W+2*b)*s,(3+b)*s); }
+  if(qrBack){
+    const ps=30, px=(W-ps)/2, py=7.5;
+    if(t.back==='paper'){ c.qr(px+1.5,py+1.5,ps-3,t.fg); }
+    else { ctx.fillStyle='#ffffff'; rrect(ctx,P(px),P(py),L(ps),L(ps),L(1.6)); ctx.fill(); c.qr(px+2.4,py+2.4,ps-4.8,'#111111'); }
+    c.text('Escanea para guardar el contacto',W/2,py+ps+5,2.3,500,cap,{align:'center'});
+  } else {
+    const col=onAccent?'#ffffff':t.fg;
+    if(logoImg) c.img(logoImg,(W-44)/2,(H-20)/2-(t.back==='paper'?1.5:0),44,20,'center');
+    else c.text(st.empresa||[st.nombre,st.apellidos].join(' '),W/2,H/2+1.6-(t.back==='paper'?1.5:0),4.6,700,col,{align:'center',maxW:W-14});
+  }
+}
+function lighten(hex){ // accent made legible on the dark template
+  const m=hex.replace('#',''); let r=parseInt(m.slice(0,2),16),g=parseInt(m.slice(2,4),16),bl=parseInt(m.slice(4,6),16);
+  const mix=v=>Math.round(v+(255-v)*0.55); return `rgb(${mix(r)},${mix(g)},${mix(bl)})`;
+}
+function renderCanvas(side,s,b,guides){
+  const cv=document.createElement('canvas'); cv.width=Math.round((W+2*b)*s); cv.height=Math.round((H+2*b)*s);
+  drawCard(cv.getContext('2d'),side,s,b,guides); return cv;
+}
+
+/* ---------- preview ---------- */
+let raf=0;
+function render(){ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{
+  const dpr=Math.min(window.devicePixelRatio||1,3), s=6*dpr, g=$('guides').checked;
+  ['front','back'].forEach(side=>{
+    const cv=$(side==='front'?'cvFront':'cvBack'); cv.width=Math.round(W*s); cv.height=Math.round(H*s);
+    drawCard(cv.getContext('2d'),side,s,0,g);
+  });
+  const v=vcard(); $('vcOut').textContent=v;
+  const q=getQR();
+  if(q){ const n=q.getModuleCount(), ver=(n-17)/4, bytes=new TextEncoder().encode(v).length;
+    const qrmm=st.qrSide==='front'?19:25.2, mod=(qrmm/n).toFixed(2);
+    $('qrStats').textContent=`QR v${ver} · ${n}×${n} · ${bytes} B · módulo ${mod} mm`;
+    const w=$('qrWarn'); if(qrmm/n<0.3){w.hidden=false;w.textContent='El QR va muy denso para su tamaño. Ponlo en el reverso o quita algún campo para que se lea bien impreso.'} else w.hidden=true;
+  } else { $('qrStats').textContent='QR: demasiados datos'; }
+  $('exampleNote').hidden=!(st.nombre===EXAMPLE.nombre||st.tel===EXAMPLE.tel||st.email===EXAMPLE.email||st.linkedin===EXAMPLE.linkedin);
+  const toSave=Object.assign({},st); if(!store('tq-state',toSave)){ toSave.logo=''; store('tq-state',toSave); }
+});}
+
+/* ---------- controls ---------- */
+FIELDS.forEach(f=>{ const el=$(f); el.value=st[f]||''; el.addEventListener('input',()=>{st[f]=el.value; render();}); });
+function bindSeg(id,key){ const seg=$(id);
+  const sync=()=>seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===st[key])));
+  seg.addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; st[key]=b.dataset.v; sync(); render();});
+  sync(); return sync; }
+const syncers=[bindSeg('tplSeg','template'),bindSeg('fontSeg','font'),bindSeg('qrSeg','qrSide')];
+const sw=$('swatches');
+SWATCHES.forEach(c=>{const b=document.createElement('button'); b.type='button'; b.className='swatch'; b.style.background=c; b.dataset.c=c; b.setAttribute('aria-label','Color '+c); sw.appendChild(b);});
+function syncSw(){ sw.querySelectorAll('.swatch').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c.toLowerCase()===st.accent.toLowerCase()))); $('accentPick').value=st.accent; }
+sw.addEventListener('click',e=>{const b=e.target.closest('.swatch'); if(!b) return; st.accent=b.dataset.c; syncSw(); render();});
+$('accentPick').addEventListener('input',e=>{st.accent=e.target.value; syncSw(); render();});
+syncSw();
+$('guides').addEventListener('change',render);
+
+function setLogo(src){
+  if(!src){ logoImg=null; st.logo=''; $('logoDel').hidden=true; $('logoInfo').textContent='PNG con fondo transparente queda mejor'; render(); return; }
+  const im=new Image(); im.onload=()=>{ logoImg=im; st.logo=src; $('logoDel').hidden=false; $('logoInfo').textContent='Logo cargado'; render(); };
+  im.onerror=()=>{ $('logoInfo').textContent='No se pudo leer la imagen. Prueba con un PNG o JPG.'; };
+  im.src=src;
+}
+$('logoIn').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>setLogo(r.result); r.readAsDataURL(f); e.target.value=''; });
+$('logoDel').addEventListener('click',()=>setLogo(''));
+
+/* ---------- profiles ---------- */
+function profiles(){ return load('tq-profiles')||{}; }
+function fillProfiles(sel){ const p=profiles(), s=$('profileSel'); s.innerHTML='';
+  const o0=document.createElement('option'); o0.value=''; o0.textContent=Object.keys(p).length?'Elige una tarjeta guardada…':'Aún no hay tarjetas guardadas'; s.appendChild(o0);
+  Object.keys(p).sort().forEach(k=>{const o=document.createElement('option'); o.value=k; o.textContent=k; s.appendChild(o);});
+  s.value=sel||''; }
+$('saveProfile').addEventListener('click',()=>{ const name=$('profileName').value.trim()||$('profileSel').value;
+  if(!name){ toast('Escribe un nombre para la tarjeta.'); return; }
+  const p=profiles(); p[name]=Object.assign({},st);
+  if(!store('tq-profiles',p)){ p[name].logo=''; if(store('tq-profiles',p)) toast('Guardada sin el logo: la imagen es demasiado grande para el navegador.'); else { toast('No se pudo guardar en este navegador.'); return; } }
+  else toast(`Tarjeta "${name}" guardada.`);
+  $('profileName').value=''; fillProfiles(name); });
+$('profileSel').addEventListener('change',e=>{ const p=profiles()[e.target.value]; if(!p) return;
+  st=Object.assign({},DEFAULT,p); FIELDS.forEach(f=>$(f).value=st[f]||''); syncers.forEach(f=>f()); syncSw(); setLogo(st.logo); render(); toast(`Cargada "${e.target.value}".`); });
+$('delProfile').addEventListener('click',()=>{ const k=$('profileSel').value; if(!k){ toast('Elige primero la tarjeta que quieres borrar.'); return; }
+  const btn=$('delProfile');
+  if(btn.dataset.arm!==k){ btn.dataset.arm=k; btn.textContent='¿Seguro?'; setTimeout(()=>{btn.dataset.arm='';btn.textContent='Borrar'},3000); return; }
+  const p=profiles(); delete p[k]; store('tq-profiles',p); btn.dataset.arm=''; btn.textContent='Borrar'; fillProfiles(''); toast(`Borrada "${k}".`); });
+fillProfiles('');
+
+$('copyVc').addEventListener('click',()=>{ const t=vcard();
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(()=>toast('vCard copiada.'),sel); } else sel();
+  function sel(){ const r=document.createRange(); r.selectNodeContents($('vcOut')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('Texto seleccionado: cópialo con Ctrl+C o Cmd+C.'); } });
+
+/* ---------- export ---------- */
+const slug=()=>([st.nombre,st.apellidos].join('-').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'tarjeta');
+const toBlob=cv=>new Promise(r=>cv.toBlob(r,'image/png'));
+async function save(filename,data){
+  try{
+    const blob=data instanceof Blob?data:new Blob([data],{type:filename.endsWith('.pdf')?'application/pdf':'application/octet-stream'});
+    const u=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=u; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(u),4000);
+    toast(`Descargado: ${filename}`);
+  }catch(e){ toast('No se pudo descargar el archivo en este navegador.'); }
+}
+function pdfOk(){ if(!window.jspdf){ toast('No se pudo cargar el generador de PDF. Recarga la página.'); return false } return true }
+const EXP={
+  pngf:async()=>save(`${slug()}-anverso.png`,await toBlob(renderCanvas('front',DPI_S,0))),
+  pngb:async()=>save(`${slug()}-reverso.png`,await toBlob(renderCanvas('back',DPI_S,0))),
+  qr:async()=>{ const q=getQR(); if(!q) return toast('Demasiados datos para un QR.');
+    const n=q.getModuleCount(), quiet=4, cell=Math.ceil(1200/(n+2*quiet)), size=cell*(n+2*quiet);
+    const cv=document.createElement('canvas'); cv.width=cv.height=size; const ctx=cv.getContext('2d');
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size); ctx.fillStyle='#000';
+    for(let r=0;r<n;r++) for(let k=0;k<n;k++) if(q.isDark(r,k)) ctx.fillRect((k+quiet)*cell,(r+quiet)*cell,cell,cell);
+    save(`${slug()}-qr.png`,await toBlob(cv)); },
+  pdf:async()=>{ if(!pdfOk()) return; const {jsPDF}=window.jspdf, w=W+2*BLEED, h=H+2*BLEED;
+    const doc=new jsPDF({unit:'mm',format:[w,h],orientation:'landscape'});
+    doc.addImage(renderCanvas('front',DPI_S,BLEED),'PNG',0,0,w,h,'f','FAST');
+    doc.addPage([w,h],'landscape'); doc.addImage(renderCanvas('back',DPI_S,BLEED),'PNG',0,0,w,h,'b','FAST');
+    save(`${slug()}-imprenta.pdf`,doc.output('arraybuffer')); },
+  a4:async()=>{ if(!pdfOk()) return; const {jsPDF}=window.jspdf, doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+    const mx=20, my=11, cols=2, rows=5;
+    const imgs={front:renderCanvas('front',DPI_S,0).toDataURL('image/png'),back:renderCanvas('back',DPI_S,0).toDataURL('image/png')};
+    ['front','back'].forEach((side,i)=>{ if(i) doc.addPage('a4','portrait');
+      for(let r=0;r<rows;r++) for(let k=0;k<cols;k++) doc.addImage(imgs[side],'PNG',mx+k*W,my+r*H,W,H,side,'FAST');
+      doc.setDrawColor(120); doc.setLineWidth(0.15);
+      for(let k=0;k<=cols;k++){ const x=mx+k*W; doc.line(x,my-6,x,my-1); doc.line(x,my+rows*H+1,x,my+rows*H+6); }
+      for(let r=0;r<=rows;r++){ const y=my+r*H; doc.line(mx-6,y,mx-1,y); doc.line(mx+cols*W+1,y,mx+cols*W+6,y); }
+    });
+    save(`${slug()}-hoja-A4.pdf`,doc.output('arraybuffer')); }
+};
+document.querySelectorAll('[data-exp]').forEach(b=>b.addEventListener('click',async()=>{ b.disabled=true; toast('Preparando el archivo…');
+  try{ await EXP[b.dataset.exp](); } catch(e){ toast('Algo falló al generar el archivo.'); } finally{ b.disabled=false; } }));
+
+/* ---------- boot ---------- */
+if(st.logo) setLogo(st.logo);
+render();
+const fl=[];['400','500','600','700'].forEach(w=>['Instrument Sans','Fraunces','Outfit'].forEach(f=>fl.push(document.fonts.load(`${w} 20px "${f}"`))));
+Promise.all(fl).catch(()=>{}).then(render);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(render);
+window.addEventListener('resize',render);
+
+})();
+</script>
+
+</body>
+</html>
