@@ -4,456 +4,698 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Tarjetero QR · Tarjetas de visita con QR</title>
-<meta name="description" content="Crea tu tarjeta de visita con un QR que guarda tu contacto en el móvil. Descarga el PDF para imprenta o una hoja A4. Gratis y sin registro.">
+<meta name="description" content="Diseña tu tarjeta de visita con un QR que guarda tu contacto en el móvil. PDF para imprenta, hoja A4 y PNG. Gratis y sin registro.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Tarjetero QR">
 <meta property="og:description" content="Tarjetas de visita con QR de contacto. PDF para imprenta, hoja A4 y PNG. Gratis, sin registro y sin enviar tus datos.">
 <meta property="og:image" content="https://tarjetero-qr.vercel.app/og.png">
-<meta property="og:url" content="https://tarjetero-qr.vercel.app/">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="627">
+<meta property="og:url" content="https://tarjetero-qr.vercel.app/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='7' width='28' height='18' rx='2' fill='%231d3f8f'/%3E%3Crect x='19' y='11' width='8' height='8' fill='%23fff'/%3E%3Crect x='5' y='12' width='11' height='2' fill='%23fff'/%3E%3Crect x='5' y='16' width='7' height='1.5' fill='%23fff'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#1c4a3f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='7' width='28' height='18' rx='2' fill='%231c4a3f'/%3E%3Crect x='19' y='11' width='8' height='8' fill='%23fff'/%3E%3Crect x='5' y='12' width='11' height='2' fill='%23fff'/%3E%3Crect x='5' y='16' width='7' height='1.5' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>html,body{margin:0}body{font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 <style>
-/* Mesa de pruebas de imprenta: panel de controles a la izquierda, prueba de la tarjeta a escala a la derecha */
-:root{color-scheme:light;
-  --bg:#e7eaee; --panel:#f8f9fb; --fg:#15181e; --muted:#5b6370; --line:#d2d7de; --accent:#2446c4; --accent-ink:#ffffff; --warn:#a35a00;
-  --f-ui:"Instrument Sans", "Helvetica Neue", Arial, sans-serif;
-  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+/* Mesa de corte: la tarjeta descansa sobre una plancha de corte verde con rejilla de 5 mm; el asistente va al lado */
+:root{
+  color-scheme:light;
+  --page:#eef0ee; --panel:#ffffff; --ink:#15191a; --muted:#5d6764; --line:#dfe3e0; --soft:#f4f6f5;
+  --brand:#1c4a3f; --brand-ink:#ffffff; --focus:#2f7a66; --warn:#9a5b00;
+  --mat:#1d4a40; --mat-line:rgba(255,255,255,.07); --mat-line2:rgba(255,255,255,.14); --mat-text:rgba(255,255,255,.62);
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",sans-serif;
+  --f-ui:"Figtree","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --grid:14px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111317; --panel:#1a1d23; --fg:#e8eaee; --muted:#98a0ad; --line:#2d323b; --accent:#8099ff; --accent-ink:#0d1020; --warn:#f0a94a; color-scheme:dark}}
+  --page:#0f1312; --panel:#171c1b; --ink:#e9eeec; --muted:#9aa6a2; --line:#28302e; --soft:#1d2423;
+  --brand:#5fbf9f; --brand-ink:#0b1714; --focus:#7fd6b8; --warn:#f0b35a;
+  --mat:#173b33; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111317; --panel:#1a1d23; --fg:#e8eaee; --muted:#98a0ad; --line:#2d323b; --accent:#8099ff; --accent-ink:#0d1020; --warn:#f0a94a; color-scheme:dark}
+  --page:#0f1312; --panel:#171c1b; --ink:#e9eeec; --muted:#9aa6a2; --line:#28302e; --soft:#1d2423;
+  --brand:#5fbf9f; --brand-ink:#0b1714; --focus:#7fd6b8; --warn:#f0b35a;
+  --mat:#173b33; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:14px;line-height:1.45}
-.wrap{max-width:1180px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
-header.top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:4px 12px;margin-bottom:18px}
-header.top .lede{grid-column:1/-1;margin:2px 0 0;color:var(--muted);max-width:62ch}
-h1{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:0;text-wrap:balance}
-.spec{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;align-items:start}
-.controls{display:flex;flex-direction:column;gap:14px;min-width:0}
-.proof{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 12px);display:flex;flex-direction:column;gap:14px;min-width:0}
-@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}.proof{position:static;order:-1}}
-section.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
-.box h2{margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fields .full{grid-column:1/-1}
-@media (max-width:440px){.fields{grid-template-columns:1fr}}
-label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
-input[type=text],input[type=email],input[type=tel],select{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0}
-input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--bg)}
-.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--fg);padding:6px 11px;cursor:pointer}
-.seg button+button{border-left:1px solid var(--line)}
-.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.lbl{font-size:12px;color:var(--muted);min-width:64px}
-.swatch{width:26px;height:26px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
-.swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
-input[type=color]{width:30px;height:28px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:2px;cursor:pointer}
-.btn{font:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:7px;padding:7px 12px;cursor:pointer}
-.btn:hover{border-color:var(--muted)}
-.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.note{font-size:12px;color:var(--muted);margin:0}
-.note.warn{color:var(--warn)}
-.sheet{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
-.cards{display:grid;grid-template-columns:1fr;gap:12px;justify-items:center}
-.cardwrap{width:100%;max-width:500px;display:flex;flex-direction:column;gap:6px}
-.cardwrap .cap{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
-canvas.card{width:100%;max-width:100%;aspect-ratio:85/55;height:auto;border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.18),0 6px 18px rgba(20,30,50,.14);display:block}
-.exports{display:flex;flex-wrap:wrap;gap:8px}
-.toast{font-size:12px;min-height:18px;color:var(--muted)}
-details summary{cursor:pointer;font-size:12px;color:var(--muted)}
-pre.vc{font-family:var(--f-mono);font-size:11.5px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-x:auto;margin:8px 0 0;white-space:pre}
-.chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer}
-.hidden-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+body{background:var(--page);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 
+.top{max-width:1240px;margin:0 auto;padding-block:18px 10px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+.brand svg{flex:none}
+.brand b{font-family:var(--f-display);font-weight:800;font-size:21px;letter-spacing:-.02em}
+.top .promise{font-size:13px;color:var(--muted)}
+
+.app{max-width:1240px;margin:0 auto;padding-block:4px 40px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+
+/* stage */
+.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);border-radius:18px;overflow:hidden;background-color:var(--mat);
+  background-image:
+    linear-gradient(var(--mat-line2) 1px,transparent 1px),linear-gradient(90deg,var(--mat-line2) 1px,transparent 1px),
+    linear-gradient(var(--mat-line) 1px,transparent 1px),linear-gradient(90deg,var(--mat-line) 1px,transparent 1px);
+  background-size:calc(var(--grid)*2) calc(var(--grid)*2),calc(var(--grid)*2) calc(var(--grid)*2),var(--grid) var(--grid),var(--grid) var(--grid);
+  background-position:var(--gx,0) var(--gy,0);
+  min-height:min(620px,78vh);display:flex;flex-direction:column}
+.stage-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px 0;flex-wrap:wrap}
+.flip{display:inline-flex;background:rgba(0,0,0,.28);border-radius:999px;padding:3px}
+.flip button{border:0;background:transparent;color:#e7efec;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer}
+.flip button[aria-pressed="true"]{background:#fff;color:#16332c}
+.ruler{font-family:var(--f-mono);font-size:11.5px;color:var(--mat-text);letter-spacing:.02em}
+.cards{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px 14px 22px}
+.cardbox{width:100%;max-width:560px;transition:transform .45s cubic-bezier(.2,.7,.2,1),opacity .3s}
+.cardbox canvas{display:block;width:100%;height:auto;aspect-ratio:95/65;max-width:100%}
+.cards.both .cardbox{max-width:440px}
+.stage-foot{display:flex;justify-content:space-between;gap:10px;padding:0 16px 14px;font-family:var(--f-mono);font-size:11px;color:var(--mat-text);flex-wrap:wrap}
+.cardbox.swap{transform:rotateY(80deg) scale(.96);opacity:.2}
+@media (prefers-reduced-motion:reduce){.cardbox{transition:none}}
+
+/* panel */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;min-width:0}
+.steps{display:flex;gap:4px;padding:10px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.steps::-webkit-scrollbar{display:none}
+.steps button{flex:1 0 auto;display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:8px 10px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:13.5px;font-weight:600;white-space:nowrap}
+.steps button .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;border:1.5px solid var(--line);font-family:var(--f-mono);font-weight:500}
+.steps button[aria-current="step"]{background:var(--soft);color:var(--ink)}
+.steps button[aria-current="step"] .n{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.steps button.done .n{border-color:var(--brand);color:var(--brand)}
+.body{padding:22px 22px 8px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.body h2{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:-.02em;line-height:1.15;margin:0;text-wrap:balance}
+.body .lead{margin:-10px 0 0;color:var(--muted);max-width:52ch}
+.group{display:flex;flex-direction:column;gap:10px}
+.group > .label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fields .full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
+input[type=text],input[type=email],input[type=tel],select{width:100%;min-width:0;background:var(--soft);border:1.5px solid transparent;border-radius:10px;padding:10px 12px;font-size:15px;font-weight:500;color:var(--ink);transition:border-color .15s,background .15s}
+input[type=text]:hover,input[type=email]:hover,input[type=tel]:hover,select:hover{border-color:var(--line)}
+input[type=text]:focus,input[type=email]:focus,input[type=tel]:focus,select:focus{outline:0;border-color:var(--focus);background:var(--panel)}
+.note{font-size:13px;color:var(--muted);margin:0}
+.note.warn{color:var(--warn)}
+.inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.linkbtn{border:0;background:none;padding:0;color:var(--brand);font-weight:700;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* option grids */
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opts.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opt{border:1.5px solid var(--line);background:var(--panel);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:7px;cursor:pointer;text-align:left;min-width:0;transition:border-color .15s,transform .15s}
+.opt:hover{border-color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
+.opt:disabled{opacity:.45;cursor:not-allowed}
+.opt canvas{width:100%;height:auto;aspect-ratio:85/55;display:block;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.16),0 3px 10px rgba(0,0,0,.08);background:#fff}
+.opt .t{font-weight:700;font-size:13.5px}
+.opt .d{font-size:12px;color:var(--muted);line-height:1.35}
+.opt .ico{height:56px;border-radius:8px;background:var(--soft);display:grid;place-items:center;color:var(--muted)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sw{width:36px;height:36px;border-radius:50%;border:3px solid var(--panel);box-shadow:0 0 0 1.5px var(--line);cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--ink)}
+.custom{position:relative;width:36px;height:36px;border-radius:50%;box-shadow:0 0 0 1.5px var(--line);background:conic-gradient(#e14,#f90,#ee2,#3c6,#29e,#83d,#e14);overflow:hidden;cursor:pointer}
+.custom input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.fonts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.fontopt{border:1.5px solid var(--line);background:var(--panel);border-radius:12px;padding:12px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.fontopt[aria-pressed="true"]{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
+.fontopt .aa{font-size:28px;line-height:1.1}
+.fontopt .t{font-size:12px;color:var(--muted);font-weight:600}
+
+.drop{border:2px dashed var(--line);border-radius:14px;padding:22px;display:flex;align-items:center;gap:16px;cursor:pointer;background:var(--soft);transition:border-color .15s}
+.drop.over,.drop:hover{border-color:var(--focus)}
+.drop .thumb{width:72px;height:72px;border-radius:10px;background:var(--panel) center/cover no-repeat;flex:none;display:grid;place-items:center;color:var(--muted);border:1px solid var(--line)}
+.drop b{display:block}
+.sliders{display:grid;gap:12px}
+.slider{display:grid;grid-template-columns:120px 1fr 44px;gap:10px;align-items:center;font-size:13px;font-weight:600;color:var(--muted)}
+.slider output{font-family:var(--f-mono);font-size:12px;text-align:right}
+input[type=range]{width:100%;accent-color:var(--brand)}
+
+.exports{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.exp{border:1.5px solid var(--line);background:var(--panel);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:3px;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
+.exp:hover{border-color:var(--brand)}
+.exp.main{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);grid-column:1/-1}
+.exp b{font-size:15px}
+.exp span{font-size:12.5px;opacity:.8}
+.exp:disabled{opacity:.6;cursor:progress}
+.toast{min-height:20px;font-size:13px;color:var(--brand);font-weight:600}
+details summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
+pre.vc{font-family:var(--f-mono);font-size:11.5px;background:var(--soft);border-radius:10px;padding:12px;overflow-x:auto;margin:10px 0 0;white-space:pre}
+.btn{border:1.5px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+
+.nav{display:flex;justify-content:space-between;gap:10px;padding:16px 22px 20px;border-top:1px solid var(--line);margin-top:10px}
+.nav .back{border:0;background:none;color:var(--muted);font-weight:600;cursor:pointer;padding:10px 4px}
+.nav .next{border:0;background:var(--brand);color:var(--brand-ink);font-weight:700;font-size:15px;padding:12px 22px;border-radius:12px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.nav .next:hover{filter:brightness(1.08)}
+
+footer{max-width:1240px;margin:0 auto;padding-block:0 30px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));font-size:12.5px;color:var(--muted)}
+
+@media (max-width:920px){
+  .app{grid-template-columns:minmax(0,1fr);gap:14px}
+  .stage{position:relative;top:0;min-height:0}
+  .cards{padding:10px 10px 14px}
+  .cards.both{flex-direction:row}
+  .cards.both .cardbox{max-width:none;flex:1;min-width:0}
+}
+@media (max-width:520px){
+  .top .promise{display:none}
+  .body{padding:18px 16px 6px}
+  .body h2{font-size:22px}
+  .fields{grid-template-columns:1fr}
+  .opts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fonts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .exports{grid-template-columns:1fr}
+  .slider{grid-template-columns:1fr 44px}
+  .slider > span{grid-column:1/-1}
+  .nav{position:sticky;bottom:0;background:var(--panel);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-radius:0 0 18px 18px}
+  .steps button .lbl{display:none}
+  .steps button[aria-current="step"] .lbl{display:inline}
+}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <h1>Tarjetero QR</h1>
-    <span class="spec">85 × 55 mm · sangrado 3 mm · vCard 3.0</span>
-    <p class="lede">Crea tu tarjeta de visita con un QR que guarda tu contacto en el móvil. Todo se genera en tu navegador: no se envía ningún dato.</p>
-  </header>
 
-  <div class="grid">
-    <div class="controls">
-      <section class="box">
-        <h2>Mis tarjetas</h2>
-        <div class="row">
-          <select id="profileSel" aria-label="Tarjeta guardada" style="flex:1;min-width:140px"></select>
-          <button class="btn" id="delProfile" type="button">Borrar</button>
-        </div>
-        <div class="row">
-          <input type="text" id="profileName" placeholder="Nombre de la tarjeta (p. ej. Docencia)" style="flex:1;min-width:160px">
-          <button class="btn" id="saveProfile" type="button">Guardar</button>
-        </div>
-        <p class="note">Se guardan solo en este navegador. Útil si quieres una versión para cada empresa o proyecto.</p>
-      </section>
+<header class="top">
+  <a class="brand" href="./" aria-label="Tarjetero QR, inicio">
+    <svg width="34" height="24" viewBox="0 0 34 24" aria-hidden="true"><rect x="1" y="1" width="32" height="22" rx="3" fill="#1c4a3f"/><rect x="21" y="6" width="8" height="8" rx="1" fill="#fff"/><rect x="23" y="8" width="2" height="2" fill="#1c4a3f"/><rect x="26" y="11" width="1.5" height="1.5" fill="#1c4a3f"/><rect x="5" y="7" width="11" height="2.2" rx="1" fill="#fff"/><rect x="5" y="11.5" width="7" height="1.6" rx=".8" fill="#9fd3c2"/><rect x="5" y="16" width="9" height="1.4" rx=".7" fill="#9fd3c2"/></svg>
+    <b>Tarjetero QR</b>
+  </a>
+  <span class="promise">Gratis · sin registro · tus datos no salen de tu navegador</span>
+</header>
 
-      <section class="box">
-        <h2>Datos</h2>
-        <div class="fields">
-          <label class="f">Nombre<input type="text" id="nombre"></label>
-          <label class="f">Apellidos<input type="text" id="apellidos"></label>
-          <label class="f">Cargo<input type="text" id="cargo"></label>
-          <label class="f">Empresa<input type="text" id="empresa"></label>
-          <label class="f">Teléfono<input type="tel" id="tel"></label>
-          <label class="f">Email<input type="email" id="email"></label>
-          <label class="f">Web<input type="text" id="web" placeholder="www.ejemplo.com"></label>
-          <label class="f">LinkedIn<input type="text" id="linkedin" placeholder="linkedin.com/in/usuario"></label>
-          <label class="f full">Dirección (opcional)<input type="text" id="direccion"></label>
-        </div>
-        <p class="note warn" id="exampleNote" hidden>Estos son datos de ejemplo. Pon los tuyos antes de descargar.</p>
-      </section>
-
-      <section class="box">
-        <h2>Diseño</h2>
-        <div class="row"><span class="lbl">Plantilla</span>
-          <div class="seg" id="tplSeg">
-            <button type="button" data-v="limpia">Limpia</button>
-            <button type="button" data-v="banda">Banda</button>
-            <button type="button" data-v="nocturna">Nocturna</button>
-          </div>
-        </div>
-        <div class="row"><span class="lbl">Color</span>
-          <div class="row" id="swatches"></div>
-          <input type="color" id="accentPick" aria-label="Color personalizado">
-        </div>
-        <div class="row"><span class="lbl">Letra</span>
-          <div class="seg" id="fontSeg">
-            <button type="button" data-v="sans">Sans</button>
-            <button type="button" data-v="serif">Serif</button>
-            <button type="button" data-v="geo">Geométrica</button>
-          </div>
-        </div>
-        <div class="row"><span class="lbl">QR</span>
-          <div class="seg" id="qrSeg">
-            <button type="button" data-v="back">Reverso</button>
-            <button type="button" data-v="front">Anverso</button>
-          </div>
-        </div>
-        <div class="row"><span class="lbl">Logo</span>
-          <label class="btn" for="logoIn">Subir imagen</label>
-          <input type="file" id="logoIn" accept="image/png,image/jpeg,image/svg+xml,image/webp" class="hidden-file">
-          <button class="btn" id="logoDel" type="button" hidden>Quitar</button>
-          <span class="note" id="logoInfo">PNG con fondo transparente queda mejor</span>
-        </div>
-      </section>
-    </div>
-
-    <div class="proof">
-      <div class="sheet">
-        <div class="row" style="justify-content:space-between">
-          <label class="chk"><input type="checkbox" id="guides"> Mostrar zona segura</label>
-          <span class="spec" id="qrStats"></span>
-        </div>
-        <div class="cards">
-          <div class="cardwrap"><div class="cap"><span>Anverso</span><span>85 × 55</span></div><canvas class="card" id="cvFront" aria-label="Vista previa del anverso"></canvas></div>
-          <div class="cardwrap"><div class="cap"><span>Reverso</span><span>85 × 55</span></div><canvas class="card" id="cvBack" aria-label="Vista previa del reverso"></canvas></div>
-        </div>
-        <p class="note warn" id="qrWarn" hidden></p>
+<main class="app">
+  <section class="stage" aria-label="Vista previa de la tarjeta">
+    <div class="stage-head">
+      <div class="flip" role="group" aria-label="Cara de la tarjeta">
+        <button type="button" id="sideFront" aria-pressed="true">Anverso</button>
+        <button type="button" id="sideBack" aria-pressed="false">Reverso</button>
+        <button type="button" id="sideBoth" aria-pressed="false">Ambas</button>
       </div>
-
-      <section class="box">
-        <h2>Exportar</h2>
-        <div class="exports">
-          <button class="btn primary" data-exp="pdf">PDF imprenta</button>
-          <button class="btn" data-exp="a4">PDF hoja A4 · 10 tarjetas</button>
-          <button class="btn" data-exp="pngf">PNG anverso</button>
-          <button class="btn" data-exp="pngb">PNG reverso</button>
-          <button class="btn" data-exp="qr">Solo QR</button>
-        </div>
-        <p class="note">PDF imprenta: 91 × 61 mm con sangrado, 300 ppp, dos páginas. Hoja A4: con marcas de corte; imprime a doble cara volteando por el borde largo.</p>
-        <div class="toast" id="toast" role="status"></div>
-        <details>
-          <summary>Ver el contenido del QR</summary>
-          <pre class="vc" id="vcOut"></pre>
-          <div class="row" style="margin-top:8px"><button class="btn" id="copyVc" type="button">Copiar vCard</button></div>
-        </details>
-      </section>
+      <span class="ruler">85 × 55 mm · rejilla 5 mm</span>
     </div>
-  </div>
-</div>
+    <div class="cards" id="cards">
+      <div class="cardbox" id="boxFront"><canvas id="cvFront" aria-label="Anverso de la tarjeta"></canvas></div>
+      <div class="cardbox" id="boxBack" hidden><canvas id="cvBack" aria-label="Reverso de la tarjeta"></canvas></div>
+    </div>
+    <div class="stage-foot"><span id="qrStats"></span><span>marcas de corte · sangrado 3 mm</span></div>
+  </section>
+
+  <section class="panel" aria-label="Asistente">
+    <nav class="steps" id="steps" aria-label="Pasos">
+      <button type="button" data-step="0"><span class="n">1</span><span class="lbl">Datos</span></button>
+      <button type="button" data-step="1"><span class="n">2</span><span class="lbl">Diseño</span></button>
+      <button type="button" data-step="2"><span class="n">3</span><span class="lbl">Imagen</span></button>
+      <button type="button" data-step="3"><span class="n">4</span><span class="lbl">Reverso</span></button>
+      <button type="button" data-step="4"><span class="n">5</span><span class="lbl">Descargar</span></button>
+    </nav>
+
+    <!-- 1 · Datos -->
+    <div class="body" data-pane="0">
+      <h2>¿Qué va en tu tarjeta?</h2>
+      <p class="lead">Lo que escribas aparece en la tarjeta y dentro del QR. Al escanearlo, el móvil ofrece guardarte como contacto.</p>
+      <p class="note warn" id="exampleNote">Ahora ves datos de ejemplo. <button type="button" class="linkbtn" id="clearAll">Empezar en blanco</button></p>
+      <div class="inline" id="savedRow" hidden>
+        <select id="savedSel" aria-label="Diseños guardados" style="max-width:260px"></select>
+      </div>
+      <div class="group">
+        <span class="label">Tú</span>
+        <div class="fields">
+          <label class="f">Nombre<input type="text" id="nombre" autocomplete="given-name"></label>
+          <label class="f">Apellidos<input type="text" id="apellidos" autocomplete="family-name"></label>
+          <label class="f">Cargo<input type="text" id="cargo" autocomplete="organization-title"></label>
+          <label class="f">Empresa<input type="text" id="empresa" autocomplete="organization"></label>
+        </div>
+      </div>
+      <div class="group">
+        <span class="label">Contacto</span>
+        <div class="fields">
+          <label class="f">Teléfono<input type="tel" id="tel" autocomplete="tel"></label>
+          <label class="f">Email<input type="email" id="email" autocomplete="email"></label>
+          <label class="f">Web<input type="text" id="web" placeholder="www.tuempresa.com" autocomplete="url"></label>
+          <label class="f">LinkedIn<input type="text" id="linkedin" placeholder="linkedin.com/in/usuario"></label>
+          <label class="f full">Dirección (opcional)<input type="text" id="direccion" autocomplete="street-address"></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 · Diseño -->
+    <div class="body" data-pane="1" hidden>
+      <h2>Elige el estilo</h2>
+      <p class="lead">Cada miniatura ya lleva tus datos. Toca una para probarla en grande.</p>
+      <div class="group">
+        <span class="label">Plantilla</span>
+        <div class="opts" id="tplOpts"></div>
+      </div>
+      <div class="group">
+        <span class="label">Color</span>
+        <div class="swatches" id="swatches"></div>
+      </div>
+      <div class="group">
+        <span class="label">Tipografía</span>
+        <div class="fonts" id="fontOpts"></div>
+      </div>
+    </div>
+
+    <!-- 3 · Imagen -->
+    <div class="body" data-pane="2" hidden>
+      <h2>Añade una imagen</h2>
+      <p class="lead">Puede ser tu logo o una foto que ocupe toda la tarjeta. Es opcional.</p>
+      <label class="drop" id="drop" for="imgIn">
+        <span class="thumb" id="imgThumb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg></span>
+        <span><b id="dropTitle">Sube una imagen</b><span class="note" id="dropSub">Arrástrala aquí o pulsa para elegirla. PNG, JPG o SVG.</span></span>
+      </label>
+      <input type="file" id="imgIn" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+      <div class="group">
+        <span class="label">Cómo usarla</span>
+        <div class="opts" id="imgOpts"></div>
+      </div>
+      <div class="group" id="photoCtl" hidden>
+        <span class="label">Ajustar la foto</span>
+        <div class="sliders">
+          <label class="slider"><span>Zoom</span><input type="range" id="imgZoom" min="1" max="3" step="0.05"><output id="oZoom"></output></label>
+          <label class="slider"><span>Horizontal</span><input type="range" id="imgX" min="0" max="100" step="1"><output id="oX"></output></label>
+          <label class="slider"><span>Vertical</span><input type="range" id="imgY" min="0" max="100" step="1"><output id="oY"></output></label>
+          <label class="slider"><span>Oscurecer</span><input type="range" id="overlay" min="0" max="85" step="1"><output id="oOv"></output></label>
+        </div>
+      </div>
+      <div class="inline" id="imgActions" hidden><button type="button" class="btn" id="imgDel">Quitar imagen</button></div>
+    </div>
+
+    <!-- 4 · Reverso -->
+    <div class="body" data-pane="3" hidden>
+      <h2>El reverso y el QR</h2>
+      <p class="lead">El QR en el reverso se lee mejor porque tiene más espacio. En el anverso queda todo en una cara.</p>
+      <div class="group">
+        <span class="label">Dónde va el QR</span>
+        <div class="opts two" id="qrOpts"></div>
+      </div>
+      <div class="group">
+        <span class="label">Fondo del reverso</span>
+        <div class="opts" id="backOpts"></div>
+      </div>
+      <p class="note warn" id="qrWarn" hidden></p>
+    </div>
+
+    <!-- 5 · Descargar -->
+    <div class="body" data-pane="4" hidden>
+      <h2>Lista para imprimir</h2>
+      <p class="lead">Antes de imprimir muchas, escanea el QR de la pantalla con tu móvil para comprobarlo.</p>
+      <div class="exports">
+        <button type="button" class="exp main" data-exp="pdf"><b>PDF para imprenta</b><span>91 × 61 mm con sangrado de 3 mm, 300 ppp. Anverso y reverso.</span></button>
+        <button type="button" class="exp" data-exp="a4"><b>Hoja A4 · 10 tarjetas</b><span>Con marcas de corte, para imprimir en casa a doble cara.</span></button>
+        <button type="button" class="exp" data-exp="png"><b>Imágenes PNG</b><span>Anverso y reverso a 300 ppp, para el móvil o el email.</span></button>
+        <button type="button" class="exp" data-exp="qr"><b>Solo el QR</b><span>PNG en alta resolución para firmas o presentaciones.</span></button>
+        <button type="button" class="exp" data-exp="vcf"><b>Archivo de contacto</b><span>.vcf para adjuntar en un correo.</span></button>
+      </div>
+      <div class="toast" id="toast" role="status"></div>
+      <div class="group">
+        <span class="label">Guardar este diseño</span>
+        <div class="inline">
+          <input type="text" id="saveName" placeholder="Por ejemplo: Docencia" style="flex:1;min-width:160px">
+          <button type="button" class="btn" id="saveBtn">Guardar</button>
+          <button type="button" class="btn" id="delBtn" hidden>Borrar guardado</button>
+        </div>
+        <p class="note">Se guarda solo en este navegador. Lo recuperas en el paso 1.</p>
+      </div>
+      <details>
+        <summary>Ver lo que lleva el QR</summary>
+        <pre class="vc" id="vcOut"></pre>
+      </details>
+    </div>
+
+    <div class="nav">
+      <button type="button" class="back" id="prevBtn">← Atrás</button>
+      <button type="button" class="next" id="nextBtn">Siguiente</button>
+    </div>
+  </section>
+</main>
+
+<footer>Tarjetero QR genera todo en tu navegador. Ningún dato se envía a ningún servidor.</footer>
 
 <script>
 (function(){
-const W=85, H=55, BLEED=3, DPI_S=300/25.4;
-const FONTS={sans:'"Instrument Sans", Helvetica, Arial, sans-serif', serif:'"Fraunces", Georgia, serif', geo:'"Outfit", Futura, "Century Gothic", sans-serif'};
-const TPL={
-  limpia:{bg:'#ffffff',fg:'#1b1d22',muted:'#6b7079',band:0,back:'accent'},
-  banda:{bg:'#ffffff',fg:'#1b1d22',muted:'#6b7079',band:22,back:'paper'},
-  nocturna:{bg:'#16181e',fg:'#f3f3f1',muted:'#a6abb5',band:0,back:'dark'}
+"use strict";
+const W=85,H=55,BLEED=3,DPI=300/25.4,MARGIN=5;
+const FONTS={
+  moderna:{fam:'"Instrument Sans", "Helvetica Neue", Arial, sans-serif',name:'Moderna'},
+  clasica:{fam:'"Fraunces", Georgia, serif',name:'Clásica'},
+  geometrica:{fam:'"Outfit", "Century Gothic", sans-serif',name:'Geométrica'},
+  tecnica:{fam:'"IBM Plex Mono", Consolas, monospace',name:'Técnica'}
 };
-const SWATCHES=['#1d3f8f','#0f5b4f','#8a1c2b','#2b2d33','#b0631b','#5a3d8a'];
-const EXAMPLE={tel:'+34 600 000 000',email:'lucia@transportesdelebro.es',linkedin:'linkedin.com/in/lucia-ejemplo',nombre:'Lucía'};
-const DEFAULT={nombre:'Lucía',apellidos:'Martín Ortega',cargo:'Responsable de Operaciones',empresa:'Transportes del Ebro',
-  tel:EXAMPLE.tel,email:EXAMPLE.email,web:'transportesdelebro.es',linkedin:EXAMPLE.linkedin,direccion:'',
-  template:'limpia',accent:'#1d3f8f',font:'sans',qrSide:'back',logo:''};
-const FIELDS=['nombre','apellidos','cargo','empresa','tel','email','web','linkedin','direccion'];
+const TEMPLATES=[
+  {id:'limpia',name:'Limpia',desc:'Blanca y ordenada'},
+  {id:'banda',name:'Banda',desc:'Franja lateral de color'},
+  {id:'bloque',name:'Bloque',desc:'Mitad de color'},
+  {id:'editorial',name:'Editorial',desc:'Centrada, con filete'},
+  {id:'nocturna',name:'Nocturna',desc:'Fondo oscuro'},
+  {id:'marco',name:'Marco',desc:'Borde fino de color'}
+];
+const SWATCHES=['#1c4a3f','#1d3f8f','#8a1c2b','#b35a12','#5a3d8a','#0f6c8a','#2b2d33','#a1824a'];
+const EX={nombre:'Lucía',apellidos:'Martín Ortega',cargo:'Responsable de Operaciones',empresa:'Transportes del Ebro',tel:'+34 600 000 000',email:'lucia@transportesdelebro.es',web:'transportesdelebro.es',linkedin:'linkedin.com/in/lucia-ejemplo',direccion:''};
+const FIELDS=Object.keys(EX);
+const DEFAULT=Object.assign({},EX,{template:'limpia',accent:'#1c4a3f',font:'moderna',qrSide:'back',backStyle:'color',imgMode:'none',img:'',imgZoom:1,imgX:50,imgY:50,overlay:45});
 
-let st=Object.assign({},DEFAULT);
-let logoImg=null, qrCache={key:'',qr:null};
-
-function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
-function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
-const saved=load('tq-state'); if(saved) st=Object.assign({},DEFAULT,saved);
-
+let st=Object.assign({},DEFAULT), img=null, step=0, view='front', qrC={k:'',q:null};
 const $=id=>document.getElementById(id);
-const toast=m=>{$('toast').textContent=m};
+const load=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}};
+const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
+const s0=load('tq2-state'); if(s0) st=Object.assign({},DEFAULT,s0);
 
-/* ---------- vCard ---------- */
+/* ---------- vCard / QR ---------- */
 const esc=s=>String(s).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
-const url=s=>{s=s.trim(); if(!s) return ''; return /^https?:\/\//i.test(s)?s:'https://'+s};
-function liUrl(s){s=s.trim(); if(!s) return ''; if(/linkedin\.com/i.test(s)) return url(s); return 'https://www.linkedin.com/in/'+s.replace(/^@/,'')}
+const toUrl=s=>{s=s.trim();return !s?'':(/^https?:\/\//i.test(s)?s:'https://'+s)};
+const liUrl=s=>{s=s.trim();if(!s)return'';return /linkedin\.com/i.test(s)?toUrl(s):'https://www.linkedin.com/in/'+s.replace(/^@/,'')};
 const short=s=>s.trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'').replace(/\/$/,'');
+const fullName=()=>[st.nombre,st.apellidos].map(s=>s.trim()).filter(Boolean).join(' ');
 function vcard(){
-  const fn=[st.nombre,st.apellidos].filter(Boolean).join(' ').trim();
-  const L=['BEGIN:VCARD','VERSION:3.0',`N:${esc(st.apellidos)};${esc(st.nombre)};;;`,`FN:${esc(fn)}`];
-  if(st.empresa) L.push('ORG:'+esc(st.empresa));
-  if(st.cargo) L.push('TITLE:'+esc(st.cargo));
-  if(st.tel) L.push('TEL;TYPE=CELL:'+st.tel.replace(/[^\d+]/g,''));
-  if(st.email) L.push('EMAIL;TYPE=INTERNET:'+st.email.trim());
-  if(st.web) L.push('URL:'+url(st.web));
-  if(st.linkedin) L.push('URL;TYPE=LinkedIn:'+liUrl(st.linkedin));
-  if(st.direccion) L.push('ADR;TYPE=WORK:;;'+esc(st.direccion)+';;;;');
-  L.push('END:VCARD');
-  return L.join('\r\n');
+  const L=['BEGIN:VCARD','VERSION:3.0',`N:${esc(st.apellidos.trim())};${esc(st.nombre.trim())};;;`,`FN:${esc(fullName())}`];
+  if(st.empresa.trim())L.push('ORG:'+esc(st.empresa.trim()));
+  if(st.cargo.trim())L.push('TITLE:'+esc(st.cargo.trim()));
+  if(st.tel.trim())L.push('TEL;TYPE=CELL:'+st.tel.replace(/[^\d+]/g,''));
+  if(st.email.trim())L.push('EMAIL;TYPE=INTERNET:'+st.email.trim());
+  if(st.web.trim())L.push('URL:'+toUrl(st.web));
+  if(st.linkedin.trim())L.push('URL;TYPE=LinkedIn:'+liUrl(st.linkedin));
+  if(st.direccion.trim())L.push('ADR;TYPE=WORK:;;'+esc(st.direccion.trim())+';;;;');
+  L.push('END:VCARD');return L.join('\r\n');
 }
-function getQR(){
-  const v=vcard();
-  if(qrCache.key===v) return qrCache.qr;
-  let qr=null;
-  try{ qr=qrcode(0,'M'); qr.addData(unescape(encodeURIComponent(v))); qr.make(); }catch(e){ qr=null }
-  qrCache={key:v,qr}; return qr;
+function getQR(){const v=vcard();if(qrC.k===v)return qrC.q;let q=null;
+  try{q=qrcode(0,'M');q.addData(unescape(encodeURIComponent(v)));q.make()}catch(e){q=null}
+  qrC={k:v,q};return q}
+function contacts(){return [['T',st.tel.trim()],['E',st.email.trim()],['W',short(st.web)],['in',short(st.linkedin)],['D',st.direccion.trim()]].filter(x=>x[1])}
+
+/* ---------- colour helpers ---------- */
+function rgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16))}
+function mix(h,t,a){const c=rgb(h),d=rgb(t);return `rgb(${c.map((v,i)=>Math.round(v+(d[i]-v)*a)).join(',')})`}
+function lum(h){const [r,g,b]=rgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*b}
+const onAccent=()=>lum(st.accent)>.45?'#15191a':'#ffffff';
+
+/* ---------- drawing primitives ---------- */
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function kit(ctx,s,ox,oy){ // mm -> px, origin at the card's top-left corner
+  const X=v=>ox+v*s,Y=v=>oy+v*s,L=v=>v*s,fam=FONTS[st.font].fam;
+  const font=(z,w,f)=>{ctx.font=`${w} ${L(z)}px ${f||fam}`};
+  function text(str,x,y,z,w,col,o={}){
+    if(!str)return;ctx.save();
+    if('letterSpacing' in ctx)ctx.letterSpacing=o.ls?L(o.ls)+'px':'0px';
+    let size=z;font(size,w,o.f);
+    if(o.maxW){while(ctx.measureText(str).width>L(o.maxW)&&size>z*.55){size-=z*.04;font(size,w,o.f)}}
+    ctx.fillStyle=col;ctx.textAlign=o.align||'left';ctx.textBaseline='alphabetic';ctx.fillText(str,X(x),Y(y));ctx.restore();
+  }
+  function rect(x,y,w,h,col){ctx.fillStyle=col;ctx.fillRect(X(x),Y(y),L(w),L(h))}
+  function qr(x,y,size,col){const q=getQR();if(!q)return;const n=q.getModuleCount(),c=size/n;ctx.fillStyle=col;
+    for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k)){const x0=Math.round(X(x+k*c)),x1=Math.round(X(x+(k+1)*c)),y0=Math.round(Y(y+r*c)),y1=Math.round(Y(y+(r+1)*c));ctx.fillRect(x0,y0,x1-x0,y1-y0)}}
+  function qrTile(x,y,size,pad){ctx.fillStyle='#ffffff';rr(ctx,X(x),Y(y),L(size),L(size),L(Math.max(.8,size*.05)));ctx.fill();qr(x+pad,y+pad,size-2*pad,'#111111')}
+  function cover(x,y,w,h){if(!img)return;ctx.save();ctx.beginPath();ctx.rect(X(x),Y(y),L(w),L(h));ctx.clip();
+    const sc=Math.max(w/img.width,h/img.height)*st.imgZoom,dw=img.width*sc,dh=img.height*sc;
+    ctx.drawImage(img,X(x+(w-dw)*st.imgX/100),Y(y+(h-dh)*st.imgY/100),L(dw),L(dh));
+    ctx.fillStyle=`rgba(0,0,0,${st.overlay/100})`;ctx.fillRect(X(x),Y(y),L(w),L(h));ctx.restore()}
+  function logo(x,y,w,h,align){if(!img)return;const r=Math.min(w/img.width,h/img.height),dw=img.width*r,dh=img.height*r;
+    const dx=align==='center'?x+(w-dw)/2:(align==='right'?x+w-dw:x);ctx.drawImage(img,X(dx),Y(y+(h-dh)/2),L(dw),L(dh))}
+  return {X,Y,L,text,rect,qr,qrTile,cover,logo};
 }
 
-/* ---------- drawing ---------- */
-function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
-function makeCtx(ctx,s,b){
-  const P=v=>(v+b)*s, L=v=>v*s, fam=FONTS[st.font];
-  function setFont(size,weight,family){ctx.font=`${weight} ${L(size)}px ${family||fam}`}
-  function fit(str,size,weight,maxW,family){let z=size; setFont(z,weight,family);
-    while(ctx.measureText(str).width>L(maxW)&&z>size*0.6){z-=size*0.04;setFont(z,weight,family)} return z}
-  function text(str,x,y,size,weight,color,opt={}){
-    if(!str) return; ctx.save();
-    if('letterSpacing' in ctx) ctx.letterSpacing=opt.ls?L(opt.ls)+'px':'0px';
-    if(opt.maxW) fit(str,size,weight,opt.maxW,opt.family); else setFont(size,weight,opt.family);
-    ctx.fillStyle=color; ctx.textAlign=opt.align||'left'; ctx.textBaseline='alphabetic';
-    ctx.fillText(str,P(x),P(y)); ctx.restore();
+/* ---------- templates ---------- */
+const INK='#17191e',MUTED='#6a7078';
+function drawFront(ctx,k,b){
+  const t=st.template,photo=st.imgMode==='fondo'&&img,useLogo=st.imgMode==='logo'&&img,qrF=st.qrSide==='front';
+  const A=st.accent,full=[-b,-b,W+2*b,H+2*b];
+  let ink=INK,muted=MUTED,lab=A,name=fullName()||'Tu nombre';
+  const dark=()=>{ink='#ffffff';muted='rgba(255,255,255,.78)';lab=lum(A)>.25?A:mix(A,'#ffffff',.55)};
+  const list=contacts();
+  function contactsAt(x0,yBottom,maxR,lh){const n=list.length;let y=yBottom-(n-1)*lh;
+    list.forEach(([key,v])=>{k.text(key,x0,y,1.95,700,lab);k.text(v,x0+4.4,y,2.45,400,ink,{maxW:maxR-x0-4.4});y+=lh})}
+  function qrFront(x,y,size,onDark){ if(onDark) k.qrTile(x,y,size,1.4); else k.qr(x,y,size,ink) }
+
+  if(t==='limpia'||t==='nocturna'||t==='marco'){
+    if(t==='nocturna'){k.rect(...full,'#15171c');dark()} else k.rect(...full,'#ffffff');
+    if(photo){k.cover(...full);dark()}
+    if(t==='marco'){ctx.save();ctx.strokeStyle=photo?'rgba(255,255,255,.85)':A;ctx.lineWidth=k.L(.5);ctx.strokeRect(k.X(3.2),k.Y(3.2),k.L(W-6.4),k.L(H-6.4));ctx.restore()}
+    const x0=t==='marco'?7.5:6,R=W-x0,qs=18,textR=qrF?R-qs-3:R;
+    if(useLogo)k.logo(x0,5.5,30,9,'left'); else k.text((st.empresa||'').toUpperCase(),x0,10,2.2,600,photo?'#ffffff':(t==='nocturna'?mix(A,'#ffffff',.55):A),{ls:.32,maxW:R-x0});
+    k.text(name,x0,25,5.2,700,ink,{maxW:R-x0});
+    k.text(st.cargo,x0,29.6,2.7,400,muted,{maxW:R-x0});
+    if(useLogo&&st.empresa)k.text(st.empresa,x0,33.2,2.5,600,muted,{maxW:R-x0});
+    contactsAt(x0,H-(t==='marco'?7.5:6),textR,list.length>=5?3.2:3.6);
+    if(qrF)qrFront(R-qs,H-(t==='marco'?7.5:6)-qs,qs,photo||t==='nocturna');
   }
-  function qr(x,y,size,color){
-    const q=getQR(); if(!q) return; const n=q.getModuleCount(), c=size/n;
-    ctx.fillStyle=color;
-    for(let r=0;r<n;r++) for(let k=0;k<n;k++) if(q.isDark(r,k)){
-      const x0=Math.round(P(x+k*c)), x1=Math.round(P(x+(k+1)*c)), y0=Math.round(P(y+r*c)), y1=Math.round(P(y+(r+1)*c));
-      ctx.fillRect(x0,y0,x1-x0,y1-y0);
+  else if(t==='banda'){
+    const bw=21;k.rect(...full,'#ffffff');
+    if(photo){k.cover(bw,-b,W-bw+b,H+2*b);dark()}
+    k.rect(-b,-b,bw+b,H+2*b,A);
+    const oc=onAccent();
+    if(useLogo){ // logo sits on a white chip inside the band
+      ctx.fillStyle='#ffffff';rr(ctx,k.X(3),k.Y(4),k.L(bw-6),k.L(bw-6),k.L(1.2));ctx.fill();k.logo(4.2,5.2,bw-8.4,bw-8.4,'center');
     }
+    const lbl=(st.empresa||'').toUpperCase();
+    if(lbl){ctx.save();ctx.translate(k.X(bw/2),k.Y(useLogo?H/2+8:H/2));ctx.rotate(-Math.PI/2);const kk=kit(ctx,k.L(1),0,0);kk.text(lbl,0,1,3,600,oc,{align:'center',ls:.35,maxW:useLogo?H-30:H-12});ctx.restore()}
+    const x0=bw+5,R=W-5,qs=17,textR=qrF?R-qs-3:R;
+    k.text(name,x0,22,4.8,700,ink,{maxW:R-x0});
+    k.text(st.cargo,x0,26.4,2.6,400,muted,{maxW:R-x0});
+    contactsAt(x0,H-6,textR,list.length>=5?3.2:3.6);
+    if(qrF)qrFront(R-qs,H-6-qs,qs,photo);
   }
-  function img(im,x,y,w,h,align){
-    const r=Math.min(w/im.width,h/im.height), dw=im.width*r, dh=im.height*r;
-    const dx=align==='center'?x+(w-dw)/2:x, dy=align==='center'?y+(h-dh)/2:y+(h-dh)/2;
-    ctx.drawImage(im,P(dx),P(dy),L(dw),L(dh));
+  else if(t==='bloque'){
+    const bh=29;k.rect(...full,'#ffffff');
+    if(photo)k.cover(-b,-b,W+2*b,bh+b); else k.rect(-b,-b,W+2*b,bh+b,A);
+    const oc=photo?'#ffffff':onAccent(),ocm=photo?'rgba(255,255,255,.85)':(oc==='#ffffff'?'rgba(255,255,255,.82)':'rgba(0,0,0,.65)');
+    if(useLogo){ctx.fillStyle='#ffffff';rr(ctx,k.X(W-6-20),k.Y(5),k.L(20),k.L(9),k.L(1));ctx.fill();k.logo(W-6-19,5.6,18,7.8,'center')}
+    k.text((st.empresa||'').toUpperCase(),6,9.5,2.1,600,ocm,{ls:.32,maxW:useLogo?W-36:W-12});
+    k.text(name,6,21,5,700,oc,{maxW:W-12});
+    k.text(st.cargo,6,25.3,2.6,400,ocm,{maxW:W-12});
+    const qs=15,R=qrF?W-6-qs-3:W-6;
+    if(list.length<=2||qrF){contactsAt(6,H-5.5,R,list.length>=5?2.9:3.3)}
+    else{ // two columns
+      const half=Math.ceil(list.length/2),colW=(W-12)/2;
+      list.forEach(([key,v],i)=>{const col=i<half?0:1,row=i<half?i:i-half,x=6+col*colW,y=36.5+row*3.7;
+        k.text(key,x,y,1.95,700,A);k.text(v,x+4.4,y,2.35,400,INK,{maxW:colW-6})});
+    }
+    if(qrF)k.qr(W-6-qs,H-5-qs,qs,INK);
   }
-  return {P,L,text,qr,img,fam};
-}
-
-function drawCard(ctx,side,s,b,guides){
-  const t=TPL[st.template], c=makeCtx(ctx,s,b), {P,L}=c;
-  const full=[(W+2*b)*s,(H+2*b)*s];
-  let bg=t.bg; if(side==='back'&&t.back==='accent') bg=st.accent;
-  ctx.fillStyle=bg; ctx.fillRect(0,0,full[0],full[1]);
-  if(side==='front') drawFront(ctx,c,t,b,s); else drawBack(ctx,c,t,b,s);
-  if(guides){
-    ctx.save(); ctx.setLineDash([L(1),L(0.8)]); ctx.lineWidth=Math.max(1,L(0.15));
-    ctx.strokeStyle=(side==='back'&&t.back==='accent')||st.template==='nocturna'?'rgba(255,255,255,.55)':'rgba(220,40,90,.7)';
-    ctx.strokeRect(P(4),P(4),L(W-8),L(H-8)); ctx.restore();
-  }
-}
-function contacts(){
-  return [['T',st.tel],['E',st.email.trim()],['W',short(st.web)],['in',short(st.linkedin)],['D',st.direccion]].filter(x=>x[1]);
-}
-function drawFront(ctx,c,t,b,s){
-  const {P,L}=c; let x0=6;
-  if(t.band){
-    ctx.fillStyle=st.accent; ctx.fillRect(0,0,P(t.band),(H+2*b)*s); x0=t.band+5;
-    const label=(st.empresa||st.nombre||'').toUpperCase();
-    if(label){ctx.save(); ctx.translate(P(t.band/2),P(H/2)); ctx.rotate(-Math.PI/2);
-      const cc=makeCtx(ctx,s,0); // local coords (origin already translated)
-      cc.text(label,0,1.1,3.1,600,'#ffffff',{align:'center',ls:0.35,maxW:H-12}); ctx.restore();}
-  }
-  const right=W-6, qrFront=st.qrSide==='front', qrSize=19;
-  const textRight=qrFront?right-qrSize-3:right;
-  if(logoImg){ c.img(logoImg,x0,5.5,26,9,'left'); }
-  else if(!t.band && st.empresa){ c.text(st.empresa.toUpperCase(),x0,9.4,2.3,600,t===TPL.nocturna?lighten(st.accent):st.accent,{ls:0.3,maxW:right-x0}); }
-  const fn=[st.nombre,st.apellidos].filter(Boolean).join(' ');
-  c.text(fn,x0,24,5.1,700,t.fg,{maxW:right-x0});
-  c.text(st.cargo,x0,28.6,2.7,400,t.muted,{maxW:right-x0});
-  if(logoImg && !t.band && st.empresa) c.text(st.empresa,x0,32.2,2.5,600,t.muted,{maxW:right-x0});
-  const list=contacts(), n=list.length, lh=n>=5?3.25:3.7;
-  let y=H-6-(n-1)*lh;
-  const labCol=t===TPL.nocturna?lighten(st.accent):st.accent;
-  list.forEach(([k,v])=>{ c.text(k,x0,y,2.0,700,labCol); c.text(v,x0+4.4,y,2.45,400,t.fg,{maxW:textRight-x0-4.4}); y+=lh; });
-  if(qrFront){
-    const qx=right-qrSize, qy=H-6-qrSize;
-    if(st.template==='nocturna'){ ctx.fillStyle='#ffffff'; rrect(ctx,P(qx),P(qy),L(qrSize),L(qrSize),L(1.2)); ctx.fill(); c.qr(qx+1.6,qy+1.6,qrSize-3.2,'#111111'); }
-    else c.qr(qx,qy,qrSize,t.fg);
+  else if(t==='editorial'){
+    k.rect(...full,'#ffffff');if(photo){k.cover(...full);dark()}
+    const qs=17,cx=qrF?(W-qs-6)/2+1:W/2,mw=qrF?W-qs-14:W-14;
+    if(useLogo)k.logo(cx-14,5,28,8,'center'); else k.text((st.empresa||'').toUpperCase(),cx,10,2,600,photo?'#ffffff':A,{align:'center',ls:.45,maxW:mw});
+    k.text(name,cx,25.5,5.4,700,ink,{align:'center',maxW:mw});
+    ctx.fillStyle=photo?'#ffffff':A;ctx.fillRect(k.X(cx-6),k.Y(28.6),k.L(12),k.L(.45));
+    k.text(st.cargo,cx,33.2,2.6,400,muted,{align:'center',maxW:mw});
+    const l1=[st.tel.trim(),st.email.trim()].filter(Boolean).join('  ·  '),l2=[short(st.web),short(st.linkedin)].filter(Boolean).join('  ·  ');
+    k.text(l1,cx,H-9.8,2.3,500,ink,{align:'center',maxW:mw});
+    k.text(l2,cx,H-6,2.3,400,muted,{align:'center',maxW:mw});
+    if(qrF)qrFront(W-6-qs,(H-qs)/2,qs,photo);
   }
 }
-function drawBack(ctx,c,t,b,s){
-  const {P,L}=c, qrBack=st.qrSide==='back';
-  const onAccent=t.back==='accent', cap=onAccent?'rgba(255,255,255,.85)':t.muted;
-  if(t.back==='paper'){ ctx.fillStyle=st.accent; ctx.fillRect(0,P(H-3),(W+2*b)*s,(3+b)*s); }
-  if(qrBack){
-    const ps=30, px=(W-ps)/2, py=7.5;
-    if(t.back==='paper'){ c.qr(px+1.5,py+1.5,ps-3,t.fg); }
-    else { ctx.fillStyle='#ffffff'; rrect(ctx,P(px),P(py),L(ps),L(ps),L(1.6)); ctx.fill(); c.qr(px+2.4,py+2.4,ps-4.8,'#111111'); }
-    c.text('Escanea para guardar el contacto',W/2,py+ps+5,2.3,500,cap,{align:'center'});
+function drawBack(ctx,k,b){
+  const full=[-b,-b,W+2*b,H+2*b],A=st.accent,qrB=st.qrSide==='back';
+  let bs=st.backStyle; if(bs==='foto'&&!img)bs='color';
+  let fg='#ffffff',sub='rgba(255,255,255,.82)';
+  if(bs==='color'){k.rect(...full,A);fg=onAccent();sub=fg==='#ffffff'?'rgba(255,255,255,.82)':'rgba(0,0,0,.65)'}
+  else if(bs==='oscuro')k.rect(...full,'#15171c');
+  else if(bs==='foto'){k.rect(...full,'#222');k.cover(...full)}
+  else {k.rect(...full,'#ffffff');k.rect(-b,H-2.6,W+2*b,2.6+b,A);fg=INK;sub=MUTED}
+  if(qrB){
+    const ps=30,px=(W-ps)/2,py=7;
+    if(bs==='blanco')k.qr(px+1.5,py+1.5,ps-3,INK); else k.qrTile(px,py,ps,2.3);
+    k.text('Escanea para guardar el contacto',W/2,py+ps+5,2.25,500,sub,{align:'center'});
   } else {
-    const col=onAccent?'#ffffff':t.fg;
-    if(logoImg) c.img(logoImg,(W-44)/2,(H-20)/2-(t.back==='paper'?1.5:0),44,20,'center');
-    else c.text(st.empresa||[st.nombre,st.apellidos].join(' '),W/2,H/2+1.6-(t.back==='paper'?1.5:0),4.6,700,col,{align:'center',maxW:W-14});
+    const useLogo=st.imgMode==='logo'&&img;
+    if(useLogo){
+      if(bs==='blanco')k.logo((W-46)/2,15,46,19,'center');
+      else{ctx.fillStyle='#ffffff';rr(ctx,k.X((W-52)/2),k.Y(13),k.L(52),k.L(23),k.L(1.6));ctx.fill();k.logo((W-46)/2,15,46,19,'center')}
+    } else k.text(st.empresa||fullName()||'Tu empresa',W/2,H/2+1,4.6,700,fg,{align:'center',maxW:W-14});
+    k.text(short(st.web),W/2,H-(bs==='blanco'?8:7),2.3,500,sub,{align:'center',maxW:W-14});
   }
 }
-function lighten(hex){ // accent made legible on the dark template
-  const m=hex.replace('#',''); let r=parseInt(m.slice(0,2),16),g=parseInt(m.slice(2,4),16),bl=parseInt(m.slice(4,6),16);
-  const mix=v=>Math.round(v+(255-v)*0.55); return `rgb(${mix(r)},${mix(g)},${mix(bl)})`;
+// side: 'front'|'back'; mode: 'print' (bleed, no marks) | 'flat' (no bleed) | 'preview' (margin, marks, shadow)
+function renderTo(cv,side,s,mode){
+  const b=mode==='print'?BLEED:0,m=mode==='preview'?MARGIN:0,pad=b+m;
+  cv.width=Math.round((W+2*pad)*s);cv.height=Math.round((H+2*pad)*s);
+  const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+  const k=kit(ctx,s,pad*s,pad*s);
+  if(mode==='preview'){
+    ctx.save();ctx.shadowColor='rgba(0,0,0,.38)';ctx.shadowBlur=s*2.4;ctx.shadowOffsetY=s*1;ctx.fillStyle='#fff';ctx.fillRect(k.X(0),k.Y(0),k.L(W),k.L(H));ctx.restore();
+  }
+  ctx.save();ctx.beginPath();ctx.rect(k.X(-b),k.Y(-b),k.L(W+2*b),k.L(H+2*b));ctx.clip();
+  side==='front'?drawFront(ctx,k,b):drawBack(ctx,k,b);ctx.restore();
+  if(mode==='preview'){ // crop marks
+    ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=Math.max(1,s*.18);ctx.beginPath();
+    const g=1,len=3.6;
+    [[0,0],[W,0],[0,H],[W,H]].forEach(([x,y])=>{const dx=x?1:-1,dy=y?1:-1;
+      ctx.moveTo(k.X(x+dx*g),k.Y(y));ctx.lineTo(k.X(x+dx*(g+len)),k.Y(y));
+      ctx.moveTo(k.X(x),k.Y(y+dy*g));ctx.lineTo(k.X(x),k.Y(y+dy*(g+len)))});
+    ctx.stroke();
+  }
+  return cv;
 }
-function renderCanvas(side,s,b,guides){
-  const cv=document.createElement('canvas'); cv.width=Math.round((W+2*b)*s); cv.height=Math.round((H+2*b)*s);
-  drawCard(cv.getContext('2d'),side,s,b,guides); return cv;
-}
+function mk(side,s,mode){return renderTo(document.createElement('canvas'),side,s,mode)}
 
-/* ---------- preview ---------- */
+/* ---------- UI: render ---------- */
+const dpr=()=>Math.min(window.devicePixelRatio||1,2.5);
 let raf=0;
-function render(){ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{
-  const dpr=Math.min(window.devicePixelRatio||1,3), s=6*dpr, g=$('guides').checked;
-  ['front','back'].forEach(side=>{
-    const cv=$(side==='front'?'cvFront':'cvBack'); cv.width=Math.round(W*s); cv.height=Math.round(H*s);
-    drawCard(cv.getContext('2d'),side,s,0,g);
-  });
-  const v=vcard(); $('vcOut').textContent=v;
-  const q=getQR();
-  if(q){ const n=q.getModuleCount(), ver=(n-17)/4, bytes=new TextEncoder().encode(v).length;
-    const qrmm=st.qrSide==='front'?19:25.2, mod=(qrmm/n).toFixed(2);
-    $('qrStats').textContent=`QR v${ver} · ${n}×${n} · ${bytes} B · módulo ${mod} mm`;
-    const w=$('qrWarn'); if(qrmm/n<0.3){w.hidden=false;w.textContent='El QR va muy denso para su tamaño. Ponlo en el reverso o quita algún campo para que se lea bien impreso.'} else w.hidden=true;
-  } else { $('qrStats').textContent='QR: demasiados datos'; }
-  $('exampleNote').hidden=!(st.nombre===EXAMPLE.nombre||st.tel===EXAMPLE.tel||st.email===EXAMPLE.email||st.linkedin===EXAMPLE.linkedin);
-  const toSave=Object.assign({},st); if(!store('tq-state',toSave)){ toSave.logo=''; store('tq-state',toSave); }
-});}
+function render(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
+  const box=$('boxFront').clientWidth||$('boxBack').clientWidth||480;
+  const s=box/(W+2*MARGIN)*dpr();
+  renderTo($('cvFront'),'front',s,'preview');renderTo($('cvBack'),'back',s,'preview');
+  // mat grid = 5 mm at the card's scale
+  const g=box/(W+2*MARGIN)*5;document.querySelector('.stage').style.setProperty('--grid',g.toFixed(2)+'px');
+  const q=getQR(),v=vcard();$('vcOut').textContent=v;
+  if(q){const n=q.getModuleCount(),mm=st.qrSide==='front'?(st.template==='bloque'?15:17):25.4;
+    $('qrStats').textContent=`QR versión ${(n-17)/4} · ${n}×${n} módulos · ${(mm/n).toFixed(2)} mm por módulo`;
+    const w=$('qrWarn');if(mm/n<.3){w.hidden=false;w.textContent='Con tantos datos, el QR del anverso queda muy denso. Pásalo al reverso o quita algún campo para que se lea bien impreso.'}else w.hidden=true}
+  else $('qrStats').textContent='Demasiados datos para un QR';
+  $('exampleNote').hidden=!FIELDS.some(f=>st[f]&&st[f]===EX[f]);
+  if(step===1)renderTemplateThumbs();
+  if(step===2)renderImgThumbs();
+  if(step===3)renderBackThumbs();
+  const save=Object.assign({},st);if(!store('tq2-state',save)){save.img='';store('tq2-state',save)}
+})}
 
-/* ---------- controls ---------- */
-FIELDS.forEach(f=>{ const el=$(f); el.value=st[f]||''; el.addEventListener('input',()=>{st[f]=el.value; render();}); });
-function bindSeg(id,key){ const seg=$(id);
-  const sync=()=>seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===st[key])));
-  seg.addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; st[key]=b.dataset.v; sync(); render();});
-  sync(); return sync; }
-const syncers=[bindSeg('tplSeg','template'),bindSeg('fontSeg','font'),bindSeg('qrSeg','qrSide')];
-const sw=$('swatches');
-SWATCHES.forEach(c=>{const b=document.createElement('button'); b.type='button'; b.className='swatch'; b.style.background=c; b.dataset.c=c; b.setAttribute('aria-label','Color '+c); sw.appendChild(b);});
-function syncSw(){ sw.querySelectorAll('.swatch').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c.toLowerCase()===st.accent.toLowerCase()))); $('accentPick').value=st.accent; }
-sw.addEventListener('click',e=>{const b=e.target.closest('.swatch'); if(!b) return; st.accent=b.dataset.c; syncSw(); render();});
-$('accentPick').addEventListener('input',e=>{st.accent=e.target.value; syncSw(); render();});
-syncSw();
-$('guides').addEventListener('change',render);
+/* ---------- step 1: fields ---------- */
+FIELDS.forEach(f=>{const el=$(f);el.value=st[f]||'';el.addEventListener('input',()=>{st[f]=el.value;render()})});
+$('clearAll').addEventListener('click',()=>{FIELDS.forEach(f=>{st[f]='';$(f).value=''});render();$('nombre').focus()});
 
-function setLogo(src){
-  if(!src){ logoImg=null; st.logo=''; $('logoDel').hidden=true; $('logoInfo').textContent='PNG con fondo transparente queda mejor'; render(); return; }
-  const im=new Image(); im.onload=()=>{ logoImg=im; st.logo=src; $('logoDel').hidden=false; $('logoInfo').textContent='Logo cargado'; render(); };
-  im.onerror=()=>{ $('logoInfo').textContent='No se pudo leer la imagen. Prueba con un PNG o JPG.'; };
-  im.src=src;
+/* ---------- step 2: design ---------- */
+function optButton(container,key,val,title,desc,withCanvas){
+  const b=document.createElement('button');b.type='button';b.className='opt';b.dataset.v=val;
+  b.innerHTML=(withCanvas?'<canvas></canvas>':'')+`<span class="t">${title}</span>`+(desc?`<span class="d">${desc}</span>`:'');
+  b.addEventListener('click',()=>{if(b.disabled)return;st[key]=val;syncAll();render()});container.appendChild(b);return b}
+TEMPLATES.forEach(t=>optButton($('tplOpts'),'template',t.id,t.name,t.desc,true));
+function thumbWith(over,side,cv){const saved=Object.assign({},st);Object.assign(st,over);qrC.k='';renderTo(cv,side,cv.parentElement.clientWidth/W*dpr()||3,'flat');Object.assign(st,saved);qrC.k=''}
+function renderTemplateThumbs(){$('tplOpts').querySelectorAll('.opt').forEach(b=>thumbWith({template:b.dataset.v},'front',b.querySelector('canvas')))}
+SWATCHES.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='sw';b.style.background=c;b.dataset.c=c;b.setAttribute('aria-label','Color '+c);
+  b.addEventListener('click',()=>{st.accent=c;syncAll();render()});$('swatches').appendChild(b)});
+(function(){const l=document.createElement('label');l.className='custom';l.title='Otro color';l.innerHTML='<input type="color" id="accentPick" aria-label="Elegir otro color">';$('swatches').appendChild(l);
+  $('accentPick').addEventListener('input',e=>{st.accent=e.target.value;syncAll();render()})})();
+Object.entries(FONTS).forEach(([id,f])=>{const b=document.createElement('button');b.type='button';b.className='fontopt';b.dataset.v=id;
+  b.innerHTML=`<span class="aa" style='font-family:${f.fam}'>Aa</span><span class="t">${f.name}</span>`;
+  b.addEventListener('click',()=>{st.font=id;syncAll();render()});$('fontOpts').appendChild(b)});
+
+/* ---------- step 3: image ---------- */
+const IMG_MODES=[['none','Sin imagen','Solo texto'],['logo','Como logo','Arriba, junto a tus datos'],['fondo','Foto de fondo','Ocupa toda la tarjeta']];
+IMG_MODES.forEach(([v,t,d])=>optButton($('imgOpts'),'imgMode',v,t,d,true));
+function renderImgThumbs(){$('imgOpts').querySelectorAll('.opt').forEach(b=>{b.disabled=b.dataset.v!=='none'&&!img;thumbWith({imgMode:b.dataset.v},'front',b.querySelector('canvas'))})}
+function setImg(src,keepMode){
+  if(!src){img=null;st.img='';if(st.imgMode!=='none')st.imgMode='none';if(st.backStyle==='foto')st.backStyle='color';syncAll();render();return}
+  const im=new Image();im.onload=()=>{img=im;st.img=src;if(!keepMode&&st.imgMode==='none')st.imgMode=(im.width/im.height>1.7||/svg/.test(src.slice(0,30)))?'logo':'fondo';syncAll();render()};
+  im.onerror=()=>{$('dropSub').textContent='No se ha podido leer la imagen. Prueba con un PNG o un JPG.'};im.src=src;
 }
-$('logoIn').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>setLogo(r.result); r.readAsDataURL(f); e.target.value=''; });
-$('logoDel').addEventListener('click',()=>setLogo(''));
+function readFile(f){if(!f||!/^image\//.test(f.type)){$('dropSub').textContent='Ese archivo no es una imagen.';return}
+  if(f.type==='image/svg+xml'){const r=new FileReader();r.onload=()=>setImg(r.result);r.readAsDataURL(f);return}
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{ // downscale big photos so they keep in storage
+      const max=1800,sc=Math.min(1,max/Math.max(im.width,im.height));if(sc===1){setImg(r.result);return}
+      const c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      setImg(c.toDataURL(f.type==='image/png'?'image/png':'image/jpeg',.9))};im.src=r.result};r.readAsDataURL(f)}
+$('imgIn').addEventListener('change',e=>{readFile(e.target.files[0]);e.target.value=''});
+const drop=$('drop');
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
+$('imgDel').addEventListener('click',()=>setImg(''));
+[['imgZoom','oZoom',v=>(+v).toFixed(2)+'×'],['imgX','oX',v=>v+'%'],['imgY','oY',v=>v+'%'],['overlay','oOv',v=>v+'%']].forEach(([id,o,fmt])=>{
+  const el=$(id);el.value=st[id];$(o).textContent=fmt(st[id]);el.addEventListener('input',()=>{st[id]=+el.value;$(o).textContent=fmt(el.value);render()})});
 
-/* ---------- profiles ---------- */
-function profiles(){ return load('tq-profiles')||{}; }
-function fillProfiles(sel){ const p=profiles(), s=$('profileSel'); s.innerHTML='';
-  const o0=document.createElement('option'); o0.value=''; o0.textContent=Object.keys(p).length?'Elige una tarjeta guardada…':'Aún no hay tarjetas guardadas'; s.appendChild(o0);
-  Object.keys(p).sort().forEach(k=>{const o=document.createElement('option'); o.value=k; o.textContent=k; s.appendChild(o);});
-  s.value=sel||''; }
-$('saveProfile').addEventListener('click',()=>{ const name=$('profileName').value.trim()||$('profileSel').value;
-  if(!name){ toast('Escribe un nombre para la tarjeta.'); return; }
-  const p=profiles(); p[name]=Object.assign({},st);
-  if(!store('tq-profiles',p)){ p[name].logo=''; if(store('tq-profiles',p)) toast('Guardada sin el logo: la imagen es demasiado grande para el navegador.'); else { toast('No se pudo guardar en este navegador.'); return; } }
-  else toast(`Tarjeta "${name}" guardada.`);
-  $('profileName').value=''; fillProfiles(name); });
-$('profileSel').addEventListener('change',e=>{ const p=profiles()[e.target.value]; if(!p) return;
-  st=Object.assign({},DEFAULT,p); FIELDS.forEach(f=>$(f).value=st[f]||''); syncers.forEach(f=>f()); syncSw(); setLogo(st.logo); render(); toast(`Cargada "${e.target.value}".`); });
-$('delProfile').addEventListener('click',()=>{ const k=$('profileSel').value; if(!k){ toast('Elige primero la tarjeta que quieres borrar.'); return; }
-  const btn=$('delProfile');
-  if(btn.dataset.arm!==k){ btn.dataset.arm=k; btn.textContent='¿Seguro?'; setTimeout(()=>{btn.dataset.arm='';btn.textContent='Borrar'},3000); return; }
-  const p=profiles(); delete p[k]; store('tq-profiles',p); btn.dataset.arm=''; btn.textContent='Borrar'; fillProfiles(''); toast(`Borrada "${k}".`); });
-fillProfiles('');
+/* ---------- step 4: back & QR ---------- */
+optButton($('qrOpts'),'qrSide','back','En el reverso','Más grande y fácil de leer',true);
+optButton($('qrOpts'),'qrSide','front','En el anverso','Todo en una sola cara',true);
+const BACKS=[['color','Color','Tu color de marca'],['blanco','Blanco','Con filete de color'],['oscuro','Oscuro','Negro suave'],['foto','Foto','Tu imagen de fondo']];
+BACKS.forEach(([v,t,d])=>optButton($('backOpts'),'backStyle',v,t,d,true));
+function renderBackThumbs(){
+  $('qrOpts').querySelectorAll('.opt').forEach(b=>thumbWith({qrSide:b.dataset.v},b.dataset.v==='back'?'back':'front',b.querySelector('canvas')));
+  $('backOpts').querySelectorAll('.opt').forEach(b=>{b.disabled=b.dataset.v==='foto'&&!img;thumbWith({backStyle:b.dataset.v},'back',b.querySelector('canvas'))});
+}
 
-$('copyVc').addEventListener('click',()=>{ const t=vcard();
-  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(()=>toast('vCard copiada.'),sel); } else sel();
-  function sel(){ const r=document.createRange(); r.selectNodeContents($('vcOut')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('Texto seleccionado: cópialo con Ctrl+C o Cmd+C.'); } });
+/* ---------- sync pressed states ---------- */
+function syncAll(){
+  const pr=(sel,val)=>document.querySelectorAll(sel).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===val)));
+  pr('#tplOpts .opt',st.template);pr('#fontOpts .fontopt',st.font);pr('#imgOpts .opt',st.imgMode);pr('#qrOpts .opt',st.qrSide);pr('#backOpts .opt',st.backStyle);
+  document.querySelectorAll('.sw').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c.toLowerCase()===st.accent.toLowerCase())));
+  $('accentPick').value=st.accent;
+  $('photoCtl').hidden=!(img&&st.imgMode==='fondo'||img&&st.backStyle==='foto');
+  $('imgActions').hidden=!img;
+  $('imgThumb').style.backgroundImage=img?`url("${st.img}")`:'';$('imgThumb').querySelector('svg').style.display=img?'none':'';
+  $('dropTitle').textContent=img?'Cambiar imagen':'Sube una imagen';
+  if(img)$('dropSub').textContent='Arrastra otra o pulsa para cambiarla.';
+}
+
+/* ---------- steps ---------- */
+const LABELS=['Datos','Diseño','Imagen','Reverso','Descargar'];
+function setView(v){view=v;
+  $('sideFront').setAttribute('aria-pressed',String(v==='front'));$('sideBack').setAttribute('aria-pressed',String(v==='back'));$('sideBoth').setAttribute('aria-pressed',String(v==='both'));
+  $('boxFront').hidden=v==='back';$('boxBack').hidden=v==='front';$('cards').classList.toggle('both',v==='both');render()}
+function flipTo(v){if(v===view)return;const boxes=[$('boxFront'),$('boxBack')];boxes.forEach(b=>b.classList.add('swap'));
+  setTimeout(()=>{setView(v);requestAnimationFrame(()=>boxes.forEach(b=>b.classList.remove('swap')))},matchMedia('(prefers-reduced-motion: reduce)').matches?0:180)}
+$('sideFront').onclick=()=>flipTo('front');$('sideBack').onclick=()=>flipTo('back');$('sideBoth').onclick=()=>flipTo('both');
+let booted=false;
+function go(n){
+  step=Math.max(0,Math.min(4,n));
+  document.querySelectorAll('[data-pane]').forEach(p=>p.hidden=+p.dataset.pane!==step);
+  document.querySelectorAll('#steps button').forEach(b=>{const i=+b.dataset.step;b.setAttribute('aria-current',i===step?'step':'false');b.classList.toggle('done',i<step)});
+  $('prevBtn').style.visibility=step===0?'hidden':'visible';
+  $('nextBtn').textContent=step===4?'Volver a editar':'Siguiente: '+LABELS[step+1];
+  flipTo(step===3?'back':step===4?'both':'front');
+  try{sessionStorage.setItem('tq2-step',step)}catch(e){}
+  if(booted&&innerWidth<=920){document.querySelector('.panel').scrollIntoView({behavior:'smooth',block:'start'})}
+  render();
+}
+document.querySelectorAll('#steps button').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.step)));
+$('prevBtn').addEventListener('click',()=>go(step-1));
+$('nextBtn').addEventListener('click',()=>go(step===4?0:step+1));
 
 /* ---------- export ---------- */
-const slug=()=>([st.nombre,st.apellidos].join('-').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'tarjeta');
-const toBlob=cv=>new Promise(r=>cv.toBlob(r,'image/png'));
-async function save(filename,data){
-  try{
-    const blob=data instanceof Blob?data:new Blob([data],{type:filename.endsWith('.pdf')?'application/pdf':'application/octet-stream'});
-    const u=URL.createObjectURL(blob), a=document.createElement('a');
-    a.href=u; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(u),4000);
-    toast(`Descargado: ${filename}`);
-  }catch(e){ toast('No se pudo descargar el archivo en este navegador.'); }
-}
-function pdfOk(){ if(!window.jspdf){ toast('No se pudo cargar el generador de PDF. Recarga la página.'); return false } return true }
+const slug=()=>(fullName().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'tarjeta');
+const toast=m=>{$('toast').textContent=m};
+const blobOf=cv=>new Promise(r=>cv.toBlob(r,'image/png'));
+function download(name,blob){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000)}
 const EXP={
-  pngf:async()=>save(`${slug()}-anverso.png`,await toBlob(renderCanvas('front',DPI_S,0))),
-  pngb:async()=>save(`${slug()}-reverso.png`,await toBlob(renderCanvas('back',DPI_S,0))),
-  qr:async()=>{ const q=getQR(); if(!q) return toast('Demasiados datos para un QR.');
-    const n=q.getModuleCount(), quiet=4, cell=Math.ceil(1200/(n+2*quiet)), size=cell*(n+2*quiet);
-    const cv=document.createElement('canvas'); cv.width=cv.height=size; const ctx=cv.getContext('2d');
-    ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size); ctx.fillStyle='#000';
-    for(let r=0;r<n;r++) for(let k=0;k<n;k++) if(q.isDark(r,k)) ctx.fillRect((k+quiet)*cell,(r+quiet)*cell,cell,cell);
-    save(`${slug()}-qr.png`,await toBlob(cv)); },
-  pdf:async()=>{ if(!pdfOk()) return; const {jsPDF}=window.jspdf, w=W+2*BLEED, h=H+2*BLEED;
-    const doc=new jsPDF({unit:'mm',format:[w,h],orientation:'landscape'});
-    doc.addImage(renderCanvas('front',DPI_S,BLEED),'PNG',0,0,w,h,'f','FAST');
-    doc.addPage([w,h],'landscape'); doc.addImage(renderCanvas('back',DPI_S,BLEED),'PNG',0,0,w,h,'b','FAST');
-    save(`${slug()}-imprenta.pdf`,doc.output('arraybuffer')); },
-  a4:async()=>{ if(!pdfOk()) return; const {jsPDF}=window.jspdf, doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
-    const mx=20, my=11, cols=2, rows=5;
-    const imgs={front:renderCanvas('front',DPI_S,0).toDataURL('image/png'),back:renderCanvas('back',DPI_S,0).toDataURL('image/png')};
-    ['front','back'].forEach((side,i)=>{ if(i) doc.addPage('a4','portrait');
-      for(let r=0;r<rows;r++) for(let k=0;k<cols;k++) doc.addImage(imgs[side],'PNG',mx+k*W,my+r*H,W,H,side,'FAST');
-      doc.setDrawColor(120); doc.setLineWidth(0.15);
-      for(let k=0;k<=cols;k++){ const x=mx+k*W; doc.line(x,my-6,x,my-1); doc.line(x,my+rows*H+1,x,my+rows*H+6); }
-      for(let r=0;r<=rows;r++){ const y=my+r*H; doc.line(mx-6,y,mx-1,y); doc.line(mx+cols*W+1,y,mx+cols*W+6,y); }
-    });
-    save(`${slug()}-hoja-A4.pdf`,doc.output('arraybuffer')); }
+  async pdf(){const {jsPDF}=window.jspdf,w=W+2*BLEED,h=H+2*BLEED,doc=new jsPDF({unit:'mm',format:[w,h],orientation:'landscape'});
+    doc.addImage(mk('front',DPI,'print'),'PNG',0,0,w,h,'f','FAST');doc.addPage([w,h],'landscape');doc.addImage(mk('back',DPI,'print'),'PNG',0,0,w,h,'b','FAST');
+    download(slug()+'-imprenta.pdf',doc.output('blob'));return 'PDF para imprenta descargado.'},
+  async a4(){const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'}),mx=20,my=11;
+    const im={front:mk('front',DPI,'flat'),back:mk('back',DPI,'flat')};
+    ['front','back'].forEach((side,i)=>{if(i)doc.addPage('a4','portrait');
+      // back page mirrors columns so the sheet lines up when flipped on the long edge
+      for(let r=0;r<5;r++)for(let c=0;c<2;c++){const cc=side==='back'?1-c:c;doc.addImage(im[side],'PNG',mx+cc*W,my+r*H,W,H,side,'FAST')}
+      doc.setDrawColor(120);doc.setLineWidth(.15);
+      for(let c=0;c<=2;c++){const x=mx+c*W;doc.line(x,my-6,x,my-1);doc.line(x,my+5*H+1,x,my+5*H+6)}
+      for(let r=0;r<=5;r++){const y=my+r*H;doc.line(mx-6,y,mx-1,y);doc.line(mx+2*W+1,y,mx+2*W+6,y)}});
+    download(slug()+'-hoja-A4.pdf',doc.output('blob'));return 'Hoja A4 descargada.'},
+  async png(){download(slug()+'-anverso.png',await blobOf(mk('front',DPI,'flat')));await new Promise(r=>setTimeout(r,400));download(slug()+'-reverso.png',await blobOf(mk('back',DPI,'flat')));return 'Anverso y reverso descargados.'},
+  async qr(){const q=getQR();if(!q)return 'Hay demasiados datos para un QR.';const n=q.getModuleCount(),qz=4,cell=Math.ceil(1400/(n+2*qz)),size=cell*(n+2*qz),c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');
+    x.fillStyle='#fff';x.fillRect(0,0,size,size);x.fillStyle='#000';for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect((k+qz)*cell,(r+qz)*cell,cell,cell);
+    download(slug()+'-qr.png',await blobOf(c));return 'QR descargado.'},
+  async vcf(){download(slug()+'.vcf',new Blob([vcard()],{type:'text/vcard'}));return 'Contacto descargado.'}
 };
-document.querySelectorAll('[data-exp]').forEach(b=>b.addEventListener('click',async()=>{ b.disabled=true; toast('Preparando el archivo…');
-  try{ await EXP[b.dataset.exp](); } catch(e){ toast('Algo falló al generar el archivo.'); } finally{ b.disabled=false; } }));
+document.querySelectorAll('[data-exp]').forEach(b=>b.addEventListener('click',async()=>{
+  if((b.dataset.exp==='pdf'||b.dataset.exp==='a4')&&!window.jspdf){toast('No se ha cargado el generador de PDF. Recarga la página.');return}
+  b.disabled=true;toast('Preparando el archivo…');
+  try{toast(await EXP[b.dataset.exp]())}catch(e){toast('Algo ha fallado al generar el archivo. Inténtalo de nuevo.')}finally{b.disabled=false}}));
+
+/* ---------- saved designs ---------- */
+const saved=()=>load('tq2-saved')||{};
+function fillSaved(sel){const p=saved(),keys=Object.keys(p).sort(),s=$('savedSel');$('savedRow').hidden=!keys.length;$('delBtn').hidden=!keys.length;
+  s.innerHTML='<option value="">Cargar un diseño guardado…</option>'+keys.map(k=>`<option></option>`).join('');
+  keys.forEach((k,i)=>{s.options[i+1].value=k;s.options[i+1].textContent=k});s.value=sel||''}
+$('saveBtn').addEventListener('click',()=>{const name=$('saveName').value.trim();if(!name){toast('Ponle un nombre al diseño para guardarlo.');$('saveName').focus();return}
+  const p=saved();p[name]=Object.assign({},st);
+  if(!store('tq2-saved',p)){p[name].img='';if(!store('tq2-saved',p)){toast('Este navegador no permite guardar.');return}toast(`Guardado "${name}" sin la imagen: era demasiado grande.`)}
+  else toast(`Guardado "${name}".`);$('saveName').value='';fillSaved(name)});
+$('delBtn').addEventListener('click',()=>{const k=$('savedSel').value||Object.keys(saved())[0];if(!k)return;const btn=$('delBtn');
+  if(btn.dataset.arm!==k){btn.dataset.arm=k;btn.textContent=`¿Borrar "${k}"?`;setTimeout(()=>{btn.dataset.arm='';btn.textContent='Borrar guardado'},3500);return}
+  const p=saved();delete p[k];store('tq2-saved',p);btn.dataset.arm='';btn.textContent='Borrar guardado';fillSaved('');toast(`Borrado "${k}".`)});
+$('savedSel').addEventListener('change',e=>{const p=saved()[e.target.value];if(!p)return;st=Object.assign({},DEFAULT,p);FIELDS.forEach(f=>$(f).value=st[f]||'');
+  ['imgZoom','imgX','imgY','overlay'].forEach(id=>{$(id).value=st[id];$(id).dispatchEvent(new Event('input'))});setImg(st.img,true);syncAll();render()});
 
 /* ---------- boot ---------- */
-if(st.logo) setLogo(st.logo);
-render();
-const fl=[];['400','500','600','700'].forEach(w=>['Instrument Sans','Fraunces','Outfit'].forEach(f=>fl.push(document.fonts.load(`${w} 20px "${f}"`))));
-Promise.all(fl).catch(()=>{}).then(render);
-if(document.fonts&&document.fonts.ready) document.fonts.ready.then(render);
-window.addEventListener('resize',render);
-
+fillSaved('');syncAll();
+if(st.img)setImg(st.img,true);
+let s1=0;try{s1=+sessionStorage.getItem('tq2-step')||0}catch(e){}
+go(s1);booted=true;
+const fl=[];['400','500','600','700'].forEach(w=>['Instrument Sans','Fraunces','Outfit','IBM Plex Mono'].forEach(f=>fl.push(document.fonts.load(`${w} 20px "${f}"`).catch(()=>{}))));
+Promise.all(fl).then(render);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(render);
+let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,80)});
 })();
 </script>
-
 </body>
 </html>
